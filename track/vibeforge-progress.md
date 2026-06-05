@@ -179,3 +179,35 @@ Use additional files in `track/` for specific areas when this file gets too long
 - User can now safely create a new session.
 - In new session: start by reading AGENT.md + track/vibeforge-progress.md (latest) + plan/vibeforge-main-implementation-roadmap-2025-06-07.md + plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md.
 - Then create the first sub-plan (e.g., for Tauri init or Phase 1 workspace) following the roadmap.
+
+---
+
+## 2025-06-07 — Establish 'main' branch on remote (branch visibility fix)
+
+**Status:** DONE
+
+**Plan:** plan/vibeforge-main-implementation-roadmap-2025-06-07.md (and previous git plan)
+
+**Actions:**
+- Created 'main' branch locally from the plan branch state.
+- Added all previously untracked foundational files: the other plans (establish-structured, vibeforge-ui-design, vibeforge-main-roadmap), spec/, .vibeforge/config.json, and updated track.
+- Committed them to main with message referencing the plans.
+- Pushed main to origin.
+- Confirmed remote now has both 'main' and 'plan/add-git-enforcement-to-agent-instructions-2025-06-07'.
+- The plan branch remains (per "keep historical plans" rule in AGENT.md).
+- Default branch on GitHub is still the plan branch (because it was the first/only pushed initially).
+
+**Verification:**
+- git branch -a shows main and the plan branch locally and remote.
+- git remote show origin shows main tracked, but HEAD branch still points to the plan branch.
+- All structured files (plans, spec, track, .vibeforge) are now committed on main.
+
+**Impact:**
+- Remote will now show 'main' branch in addition to the plan branch.
+- This aligns with the AGENT.md git discipline (plan branches for work, main as integration point).
+- User must manually set 'main' as the default branch in GitHub repo settings (Settings > Branches > Default branch > select main).
+
+**Next:**
+- User: Go to https://github.com/HiImSunny/vibeforge/settings/branches and change Default branch to 'main'.
+- Optionally, after that, the plan branch can be left as-is (historical) or deleted if desired.
+- Future work: always on plan/* branches, merge back to main with reference to the plan.
