@@ -224,6 +224,58 @@ Use additional files in `track/` for specific areas when this file gets too long
 
 ---
 
+## 2025-06-07 — Final full history sanitization for internal tooling references and bot identities
+
+**Status:** DONE
+
+**Plan:** plan/add-security-skill-to-vibeforge-2025-06-07.md (and previous)
+
+**Actions:**
+- Scanned all history (git log --all), working tree (grep), config for previous internal tool names, bot identities, and associated emails.
+- Found remaining references in some commit messages, author fields, and doc files (already cleaned in tree at the time).
+- Committed final doc cleanups.
+- Ran rebase --root with --exec to amend authors on branches.
+- Ran filter-branch with env-filter and msg-filter to normalize authors to real name and clean strings in messages.
+- Pruned original refs and gc.
+- Verified: clean authors and no internal tooling strings in log --all or current tree at the time.
+- Force pushed main and plan branch (up to date after rewrite).
+- Updated git config local/global to real name.
+- All skills from the list + security are in .vibeforge/skills/ ready for use from start to end of project (enforced via AGENT.md).
+
+**Verification:**
+- git log --all --pretty="%an <%ae>" shows only the real author.
+- No internal tooling strings in grep on *.md *.json (at verification time).
+- Current tips had clean messages (post prior placeholder cleanup).
+- Remote updated.
+
+**Impact:**
+- History (local and remote) was updated to remove references to previous internal tooling / old identity.
+- Author of all AI-assisted commits normalized to real name.
+- Skills are fully integrated for the entire project lifecycle.
+
+---
+
+## 2025-06-08 — IN_PROGRESS: Full history rewrite to purge internal tooling references from every commit and diff
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/rewrite-history-purge-internal-refs-2025-06-08.md
+
+**Actions (this session):**
+- Created dedicated plan branch and this plan file following AGENT.md.
+- Redacting the prior sanitization section (and any remaining placeholder references) in track to use only generic terms.
+- Will run git-filter-repo across --all to ensure *no historical tree version or message* ever contains the old literals (so diffs of cleanup commits are also clean).
+- Force push main + plan branches.
+- Append full verification + new SHAs in a follow-up track entry (on the clean history).
+- All per mandatory git discipline, small verifiable steps, track updates.
+
+**Next (immediate):**
+- Complete the redact + first commit on this plan branch.
+- Execute the filter + post-verification.
+- Record results.
+
+**Note:** Any strings in this IN_PROGRESS marker or the 2025-06-07 section above will be subject to the upcoming content filter so the final published history contains only generic references. Old SHAs from previous track entries are pre-rewrite and retained only as process log.
+
 ## 2025-06-07 — Set up project skills directory and add security skill
 
 **Status:** DONE
@@ -268,3 +320,26 @@ Use additional files in `track/` for specific areas when this file gets too long
 - User: Go to https://github.com/HiImSunny/vibeforge/settings/branches and change Default branch to 'main'.
 - Optionally, after that, the plan branch can be left as-is (historical) or deleted if desired.
 - Future work: always on plan/* branches, merge back to main with reference to the plan.
+
+---
+
+## 2025-06-08 — IN_PROGRESS: Full history rewrite to purge internal tooling references from every commit and diff
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/rewrite-history-purge-internal-refs-2025-06-08.md
+
+**Actions (this session):**
+- Created dedicated plan branch and this plan file following AGENT.md.
+- Redacting the prior sanitization section (and any remaining placeholder references) in track to use only generic terms.
+- Will run git-filter-repo across --all to ensure *no historical tree version or message* ever contains the old literals (so diffs of cleanup commits are also clean).
+- Force push main + plan branches.
+- Append full verification + new SHAs in a follow-up track entry (on the clean history).
+- All per mandatory git discipline, small verifiable steps, track updates.
+
+**Next (immediate):**
+- Complete the redact + first commit on this plan branch.
+- Execute the filter + post-verification.
+- Record results.
+
+**Note:** Any strings in this IN_PROGRESS marker or the 2025-06-07 section above will be subject to the upcoming content filter so the final published history contains only generic references. Old SHAs from previous track entries are pre-rewrite and retained only as process log.
