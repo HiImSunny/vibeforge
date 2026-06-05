@@ -255,27 +255,6 @@ Use additional files in `track/` for specific areas when this file gets too long
 
 ---
 
-## 2025-06-08 — IN_PROGRESS: Full history rewrite to purge internal tooling references from every commit and diff
-
-**Status:** IN_PROGRESS
-
-**Plan:** plan/rewrite-history-purge-internal-refs-2025-06-08.md
-
-**Actions (this session):**
-- Created dedicated plan branch and this plan file following AGENT.md.
-- Redacting the prior sanitization section (and any remaining placeholder references) in track to use only generic terms.
-- Will run git-filter-repo across --all to ensure *no historical tree version or message* ever contains the old literals (so diffs of cleanup commits are also clean).
-- Force push main + plan branches.
-- Append full verification + new SHAs in a follow-up track entry (on the clean history).
-- All per mandatory git discipline, small verifiable steps, track updates.
-
-**Next (immediate):**
-- Complete the redact + first commit on this plan branch.
-- Execute the filter + post-verification.
-- Record results.
-
-**Note:** Any strings in this IN_PROGRESS marker or the 2025-06-07 section above will be subject to the upcoming content filter so the final published history contains only generic references. Old SHAs from previous track entries are pre-rewrite and retained only as process log.
-
 ## 2025-06-07 — Set up project skills directory and add security skill
 
 **Status:** DONE
@@ -343,3 +322,52 @@ Use additional files in `track/` for specific areas when this file gets too long
 - Record results.
 
 **Note:** Any strings in this IN_PROGRESS marker or the 2025-06-07 section above will be subject to the upcoming content filter so the final published history contains only generic references. Old SHAs from previous track entries are pre-rewrite and retained only as process log.
+
+---
+
+## 2025-06-08 — Full history rewrite to purge internal tooling references from all commits/diffs (COMPLETE)
+
+**Status:** DONE
+
+**Plan:** plan/rewrite-history-purge-internal-refs-2025-06-08.md
+
+**Actions:**
+- Created plan/ file and switched to dedicated `plan/rewrite-history-purge-internal-refs-2025-06-08` branch (mandatory per AGENT.md).
+- Redacted the 2025-06-07 sanitization section and added this IN_PROGRESS marker using only generic terms ("internal tooling references", "previous internal tooling", "bot identities"). Verified zero original literals in tree.
+- Committed the redact + plan file (first commit on the plan branch).
+- Ran git-filter-repo with custom replacements.txt + message-callback (covering the old names / variants / the placeholder) --force. Processed 13 commits; origin temporarily removed by tool (re-added after).
+- Updated main and the historical plan/add-... branch refs to the new clean tip SHA.
+- Re-added origin remote.
+- Ran full verification (authors only real name; 0 matches for original strings in `git log --all`, in any `-p` patch for *.md, in `git grep` over rev-list).
+- Appended this DONE entry (on the post-rewrite clean history, so this text itself only ever exists in purged commits).
+- (Next) Will commit this update, then force-with-lease push the plan branch + main + historical plan branch.
+
+**Verification (captured post-filter, pre this commit):**
+- Authors: only "Lương Duy Khang <duykhang.sunext@gmail.com>"
+- git log --all --oneline had no original internal names
+- git log --all -p -- '*.md' had no occurrences of the original strings in any hunk (the goal for "diff" views).
+- Current tree grep: clean.
+- New tip SHA (all three refs): a5f0932 (the redact commit, now with cleaned ancestry).
+- Old cleanup commit messages now use replacements e.g. "(no internal-tooling or internal-tooling)" — acceptable generic.
+
+**Impact:**
+- Every commit in the history (including the diffs of prior "cleanup" commits) no longer contains or shows the original internal names.
+- Remote (after push) will reflect fully clean history for GitHub commit list and diff views.
+- Pre-rewrite SHAs (e.g. 52112bd, 6d0e746 etc. from earlier track entries) are now invalid on remote; they document the process and are noted as "pre-rewrite".
+- The IN_PROGRESS marker above was also processed by the filter (its content was already generic).
+
+**Git:**
+- Branch: plan/rewrite-history-purge-internal-refs-2025-06-08
+- This commit will be the next on top of a5f0932.
+- Force pushes required for main and both plan/* branches.
+
+**Next:**
+- Commit this track entry.
+- `git push --force-with-lease` for the three refs.
+- Update plan file status + record final pushed SHAs.
+- User to confirm on https://github.com/HiImSunny/vibeforge (may need hard refresh; GitHub sometimes lags on force push views).
+- Any other local clones: `git fetch origin && git checkout main && git reset --hard origin/main` (or re-clone).
+
+---
+
+**Overall:** History rewrite complete. Remote should now be free of the reported strings in diffs and commits.
