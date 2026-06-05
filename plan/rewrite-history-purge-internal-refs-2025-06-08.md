@@ -100,7 +100,7 @@ See detailed steps in the approved session plan file for exact one-liners (git-f
 - All steps followed (plan branch, commits referencing this plan + track, pushes, track updates after steps).
 - Final clean tip SHA: 4b41059 (docs: record full history rewrite...)
 - Remote main + both plan refs force-updated to it.
-- Tree + all historical messages + all patches: zero original "AI Bot" / "1DevTool" / "1devtool".
+- Tree + all historical messages + all patches: zero original internal names.
 - User should now see clean diffs on remote.
 
 Follow AGENT.md at every step. No direct main work. Every non-trivial change committed + pushed.
