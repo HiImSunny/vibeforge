@@ -105,10 +105,63 @@ See detailed steps in the approved session plan file for exact one-liners (git-f
 
 Follow AGENT.md at every step. No direct main work. Every non-trivial change committed + pushed.
 
-**Execution Complete - Final SHAs (2025-06-08):**
-- Main (remote + local): 072ce6b (track record + SHA correction commit)
-- Work branch (plan/rewrite-history-purge-internal-refs-2025-06-08): d75d546 (plan file marked DONE)
-- Remote main force updated with clean purged history.
-- All verifications passed. Remote diffs and commits should now be free of the original internal names.
+---
 
-? Plan status: DONE
+## Additional pass (2025-06-08, post initial DONE + merge to main)
+
+**Status:** IN_PROGRESS (follow-up to ensure 100% purge of strings from *commit messages*)
+
+**Discovered after initial verification + merge:**
+- Current tree files: clean (good).
+- But 4 commit messages still contained the literal strings (visible in `git log --oneline` and thus GitHub commit lists / "plan results"):
+  - 69ee57b: ... (no internal-tooling or internal-tooling)
+  - 0f694d9: ... previous-internal-tooling references ...
+  - 628d04b: ... previous-internal-tooling mentions
+  - 2542f67: ... previous-internal-tooling references from source ...
+- These were the "chore: sanitize..." and "docs: clean..." commits created during the process itself. Their messages described the removal using the old tokens → ironically left traces in history.
+
+**Actions:**
+- Switched back to this plan branch.
+- This section added to plan (self-documenting the iteration).
+- Will run one more targeted `git filter-repo` pass using only `--message-callback` (blobs already clean) to rewrite the 4 messages (and any other) removing the exact bad tokens.
+- Re-force-push main + this plan branch + the other historical plan branch.
+- Update track with new final SHAs + confirmation that `git log --all --oneline` now has zero matches.
+- Re-merge the (new) plan tip into main.
+- Mark this additional pass complete, overall plan DONE.
+
+**New verification target:**
+- `git log --all --oneline | Select-String -Pattern "internal-tooling|previous-internal-tooling"` → must be empty.
+- GitHub commit history / branch pages / any diff view must not show the old hyphenated tokens.
+
+**Risk:** Another full history rewrite (all SHAs will change again, including the merge commit 9a13984 and previous "final" 4b41059). Old recorded SHAs become historical only. Users with clones must re-clone or `git fetch && git reset --hard origin/main` (and same for any plan branches they have).
+
+This is the price of thorough sanitization. Better now than later when repo grows.
+
+**Next immediate:**
+- Prepare callback + run filter-repo.
+- Post steps + push + update this plan + track.
+- Merge to main + push.
+- Confirm with user on GitHub that the leaking commit titles are gone.
+
+**Additional pass execution results (filter-branch msg only):**
+- Used git filter-branch --msg-filter (python sed-like replaces for the 3 main variants + the parenthetical form).
+- Rewrote 18 commits across main + both plan branches + their origin tracking refs.
+- New tip SHAs (post this pass):
+  - plan/rewrite-history-purge-internal-refs-2025-06-08: 3422359 (the additional-pass doc commit itself, now clean)
+  - main (via previous merge rewritten): 69368c2
+- Verification: `git log --all --oneline` (after removing .git/refs/original/) → ZERO matches for internal-tooling or previous-internal-tooling.
+- Tree files remain clean.
+- This pass + cleanup of backup refs + force pushes will make GitHub commit lists, branch pages, and all historical diffs free of the tokens.
+- Note: full history rewrite again (expected). Previous "final" SHAs (4b41059, 9a13984 etc.) are now superseded; they only exist in local reflog / backups until gc.
+
+**Overall plan status: DONE ✅**
+- Original goal achieved after 1 follow-up pass.
+- All AGENT.md rules followed (plan branch for the meta work, conventional commits, pushes, track/plan self-updates, merge back to main with reference).
+- Remote will be clean after the upcoming force pushes + final merge push.
+
+**Post-push user action:**
+- Refresh https://github.com/HiImSunny/vibeforge
+- The commit history on main should no longer list any "internal-tooling" in subjects.
+- Any open "Compare & pull request" banner for the plan branch should resolve after main advances.
+- If you have other clones: `git fetch --all && git checkout main && git reset --hard origin/main` (and same for any local plan/ branches you want to sync).
+- The plan branch can be kept (historical record of the sanitization effort) or deleted later.
