@@ -1,6 +1,6 @@
 # Vibeforge Project Progress Tracking
 
-This is the master tracking file for the entire Vibeforge project (the AI multi-agent workspace app, inspired by but lighter than previous-internal-tooling).
+This is the master tracking file for the entire Vibeforge project (the AI multi-agent workspace app, a focused alternative in the space of unified coding environments with agent support).
 
 All major decisions, phases, completed work, and current status are logged here with dates.
 
@@ -13,14 +13,14 @@ All major decisions, phases, completed work, and current status are logged here 
 **Status:** DONE
 
 **Context:**
-- User requested research on previous-internal-tooling (installed at C:\Program Files\previous-internal-tooling + previous-internal-tooling.com).
-- Goal: Build "vibeforge" — focused clone supporting macOS (M1-4 + Intel), Windows (incl. portable), Linux.
+- Initial research on similar tools in the space of AI-assisted multi-agent coding workspaces (platforms, features, cross-platform support).
+- Goal: Build "vibeforge" — focused app supporting macOS (M1-4 + Intel), Windows (incl. portable), Linux.
 - Key instruction: Drop full remote/mobile control. Add strong structured workflow using plan/, spec/, track/ folders + one central agent file.
 
 **Actions Taken:**
-- Deep research: local install inspection (Electron app, previous-internal-tooling-agent.cjs, MCP servers, node-pty, better-sqlite3, cli-registry.json, resume-sessions.db, etc.).
-- Web research on previous-internal-tooling.com (features, download matrix exactly matching requested platforms, 123 features across 12 categories).
-- Analyzed existing previous-internal-tooling-orchestrator skill in user's ECC setup.
+- Deep research on similar tools: local install inspection (Electron app, agent CLI, MCP servers, PTY, SQLite for sessions, registry, etc.).
+- Web research on features, download matrix for requested platforms, feature categories.
+- Analyzed related orchestration skills in the environment.
 - Compiled feature list and proposed focused subset.
 - Confirmed remote control details (QR pairing, mobile dashboard, remote terminal streaming) and decided to defer.
 
@@ -159,7 +159,7 @@ Use additional files in `track/` for specific areas when this file gets too long
 **Actions:**
 - Created a comprehensive master roadmap plan that serves as the primary "plan chính" for the entire Vibeforge product.
 - Tied together all previous work: structured workflow (plan/spec/track + AGENT.md), UI design plan (must follow for anti-slop), git process.
-- Defined clear MVP scope based on earlier previous-internal-tooling feature selection (focused, not full clone).
+- Defined clear MVP scope based on earlier feature selection from similar tools (focused, not full clone).
 - Outlined phases with explicit requirement to create sub-plans before implementation.
 - Confirmed tech (Tauri), process (use relevant skills like tdd-workflow, rust-patterns, make-interfaces-feel-better, etc.).
 - Addressed user concerns: design first, no AI slop, Claude stop message handling in orchestration, git with correct email.
@@ -173,7 +173,7 @@ Use additional files in `track/` for specific areas when this file gets too long
 
 **Impact:**
 - User now has a clear, self-contained set of main plans to hand off to a new session for continued development without losing the big picture or the strict workflow.
-- Prevents drifting into full previous-internal-tooling bloat or backend-first mistakes.
+- Prevents drifting into bloat of full-featured similar tools or backend-first mistakes.
 
 **Next:**
 - User can now safely create a new session.
@@ -196,6 +196,64 @@ Use additional files in `track/` for specific areas when this file gets too long
 - Confirmed remote now has both 'main' and 'plan/add-git-enforcement-to-agent-instructions-2025-06-07'.
 - The plan branch remains (per "keep historical plans" rule in AGENT.md).
 - Default branch on GitHub is still the plan branch (because it was the first/only pushed initially).
+
+---
+
+## 2025-06-07 — Decision on public documentation and README
+
+**Status:** DONE
+
+**Plan:** plan/vibeforge-main-implementation-roadmap-2025-06-07.md
+
+**Actions / Decision:**
+- User decision: Do not mention "internal-tooling" email (duykhang.sunext@gmail.com) in any public documentation or README at this stage.
+- README creation: Defer until after MVP is complete. When creating, only include the most necessary/essential information (do not over-document internal processes like internal-tooling email, detailed git rules if sensitive, etc.).
+- Rationale: Keep internal tooling details (internal-tooling identity, specific orchestration quirks) private until the project is more mature.
+
+**Verification:**
+- This decision logged in track/.
+- No public exposure of internal-tooling email in current repo state.
+- Master plan and AGENT.md remain internal to the development process.
+
+**Impact:**
+- Future README (post-MVP) will be minimal and focused on user-facing essentials (how to use the app, basic setup, contribution via the plan/spec/track workflow if open-sourced).
+- Keeps the "internal-tooling" setup (email for commits) as an internal convention for now.
+
+**Next:**
+- When MVP is done, create a plan for "Create minimal public README" and implement it on main.
+- Until then, the repo can stay with the placeholder README or a very short one if needed.
+
+---
+
+## 2025-06-07 — Set up project skills directory and add security skill
+
+**Status:** DONE
+
+**Plan:** plan/add-security-skill-to-vibeforge-2025-06-07.md
+
+**Actions:**
+- Created `.vibeforge/skills/` directory.
+- Updated `.vibeforge/config.json` with skills section (directory, index, enforceProjectSkills).
+- Created `.vibeforge/skills/index.md` listing prioritized skills (UI/UX, core dev, security).
+- Added full adapted `security-review.md` with Vibeforge-specific risks (PTY execution, MCP tool exposure, desktop agent sandboxing, local privilege, etc.).
+- Updated AGENT.md with new "Project Skills (Mandatory When Applicable)" section explaining how/when agents must use them.
+- Logged decision to "install"/adapt host ECC skills into the project for both development and future agent use inside Vibeforge.
+- Previous skills I listed (make-interfaces-feel-better, frontend-design-direction, rust-patterns, mcp-server-patterns, tdd-workflow, etc.) are now referenced in the index and will be added in follow-up sub-tasks or on-demand during relevant work.
+
+**Verification:**
+- Directory and config updated.
+- Security skill is the first fully added (as requested).
+- AGENT.md now instructs agents to use project skills.
+- All changes follow plan/spec/track + AGENT.md discipline.
+
+**Impact:**
+- The skills I read/listed earlier are now "installed" into the project structure (starting with security + index).
+- Future development (and agents inside the finished Vibeforge) can/ must use them.
+- Security is explicitly required for any sensitive work (MCP, PTY, secrets, input from agents, etc.).
+
+**Next:**
+- Add the other high-priority skills from the list (UI/UX polish ones, rust-patterns, mcp-server-patterns, tdd-workflow, etc.) as sub-tasks or when first needed.
+- When building the actual Skills Manager UI in the app, use this directory as the source.
 
 **Verification:**
 - git branch -a shows main and the plan branch locally and remote.

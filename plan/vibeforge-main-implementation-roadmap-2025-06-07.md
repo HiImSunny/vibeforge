@@ -10,13 +10,13 @@
 **Track:** track/vibeforge-progress.md
 
 ## Goal
-Deliver a focused, high-quality Vibeforge desktop application that captures the core value of previous-internal-tooling (unified multi-agent coding workspace with rich context and orchestration) without the bloat.
+Deliver a focused, high-quality Vibeforge desktop application that captures the core vision of unified multi-agent coding workspaces (with rich context and orchestration) without the bloat.
 
 Vibeforge must feel intentional and "vibe"-specific (not AI slop), follow strict design principles from the UI design plan, use the enforced plan/spec/track + AGENT.md workflow, and be fully cross-platform (macOS Apple Silicon M1-M4 + Intel, Windows installer + portable, Linux deb/AppImage).
 
 All development **must** follow the existing AGENT.md rules (including git discipline with remote https://github.com/HiImSunny/vibeforge and internal-tooling email duykhang.sunext@gmail.com).
 
-## Scope (Chosen Subset from previous-internal-tooling Research - Focused MVP)
+## Scope (Chosen Subset from Initial Research on Similar Tools - Focused MVP)
 
 **Core Must-Have for v1 (delivers 70-80% of the magic):**
 - Multi-project workspace with smart file explorer.
@@ -54,7 +54,7 @@ All development **must** follow the existing AGENT.md rules (including git disci
 - **Terminal:** xterm.js (or equivalent) in webview, or native PTY bridge.
 - **Orchestration:** Rust CLI (vibeforge-agent) that can be called standalone or by the app. Support headless for the 7 agents + custom. Strip Claude stop notifications.
 - **MCP:** Implement mcp-server-patterns for exposing context tools (files, terminal send, browser, http) to agents running inside Vibeforge.
-- **Persistence:** SQLite for sessions/resume/track (inspired by previous-internal-tooling but simpler).
+- **Persistence:** SQLite for sessions/resume/track (inspired by similar tools but simpler).
 - **Packaging:** Tauri bundler for dmg/zip (mac universal or separate arm/x64), exe (setup + portable on Windows), deb/AppImage (Linux).
 - **Git:** Enforced via AGENT.md (already implemented in process).
 - **Skills/Process:** Use relevant ECC skills (blueprint, tdd-workflow, verification-loop, rust-patterns, mcp-server-patterns, frontend-patterns, make-interfaces-feel-better, etc.) when appropriate. Always create sub-plans for major features.
@@ -75,7 +75,7 @@ All development **must** follow the existing AGENT.md rules (including git disci
 
 **Phase 2: Terminal & Agent System (The Heart)**
 - PTY integration (multi terminals, layouts: grid/split/tabs/canvas, status badges, activity indicators, hover preview, jump-to-bottom).
-- Agent detection & launchers (auto-detect like previous-internal-tooling registry, one-click launch for claude/codex/etc.).
+- Agent detection & launchers (auto-detect like registries in similar tools, one-click launch for claude/codex/etc.).
 - Basic orchestration foundation (vibeforge-agent CLI with list/run --to= --prompt-stdin, output capture, stop message stripping for claude).
 - Sub-plan required: "plan/vibeforge-phase2-terminals-orchestration-2025-06-XX.md"
 
@@ -106,7 +106,7 @@ All development **must** follow the existing AGENT.md rules (including git disci
 - Prefer small, verifiable PRs.
 
 ## Risks & Mitigations
-- Risk: Scope creep back to full previous-internal-tooling feature set. → Mitigation: Strict adherence to the chosen MVP subset. Defer anything not in scope.
+- Risk: Scope creep back to bloat of full-featured similar tools. → Mitigation: Strict adherence to the chosen MVP subset. Defer anything not in scope.
 - Risk: UI feels generic/slop despite design plan. → Mitigation: Every UI component must be reviewed against the design plan checklist before merge. Activate make-interfaces-feel-better and frontend-design-direction skills for reviews.
 - Risk: Terminal/PTY cross-platform pain (especially Windows). → Mitigation: Prototype early in Phase 2. Use proven crates + xterm.js.
 - Risk: Agent orchestration quality (stop messages, context loss). → Mitigation: Specific handling for Claude stop notifications. Test with real agents.
@@ -140,3 +140,4 @@ This plan ensures we have a clear, traceable path forward while respecting the d
 - Master roadmap created as the central "plan chính".
 - This plan + the UI design plan + AGENT.md + track/vibeforge-progress.md now provide enough context for a fresh session to continue development without losing the vision, process, or anti-slop focus.
 - Next work in any session must create sub-plans for actual implementation phases.
+- User decision logged: Do not publicly document internal-tooling email. Defer README creation until post-MVP, keep it minimal with only essentials when the time comes. (See track entry for details)

@@ -11,7 +11,7 @@ Working with multiple AI coding agents across projects quickly becomes chaotic:
 - Different agents (or the same agent in different sessions) repeat research or make conflicting changes.
 - No easy way to answer "what happened from the beginning of this feature?"
 
-previous-internal-tooling solves some of this with activity logs and session resume, but we want something **simpler, more explicit, more traceable, and enforced at the filesystem level** without requiring a heavy database or proprietary format.
+Similar tools solve some of this with activity logs and session resume, but we want something **simpler, more explicit, more traceable, and enforced at the filesystem level** without requiring a heavy database or proprietary format.
 
 ## Solution Overview
 Introduce a lightweight, convention-based, human + AI-readable structured workflow using only folders and markdown files:

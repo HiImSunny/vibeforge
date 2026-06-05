@@ -109,6 +109,28 @@ Whenever you are asked to **do anything** (new feature, bug fix, refactor, resea
 
 Git is the permanent, shareable record of all work. The local `plan/`, `spec/`, and `track/` files are the detailed human-readable log; git is the immutable history.
 
+## Project Skills (Mandatory When Applicable)
+
+Vibeforge maintains a set of project-specific skills in `.vibeforge/skills/`.
+
+**Rule:** When your current task matches the description of a skill in `.vibeforge/skills/` (check the index.md first), you **must**:
+1. Read the full skill file.
+2. Follow its checklists, patterns, and "Vibeforge Adaptation" notes in addition to the core AGENT.md rules.
+3. Reference the skill(s) used in your plan and track entries (e.g. "Followed security-review skill for MCP tool boundaries").
+
+Current key skills (see `.vibeforge/skills/index.md` for full list):
+- UI/UX polish: make-interfaces-feel-better, frontend-design-direction, design-system, motion-*, accessibility.
+- Core: tdd-workflow, verification-loop, rust-patterns, mcp-server-patterns, terminal-ops, agent-harness-construction, blueprint.
+- **Security**: security-review (use on ANY code touching secrets, user input, MCP tools, PTY execution, file access, agent delegation).
+
+These skills are adapted from high-quality sources and tailored for Vibeforge's unique risks (running AI agents with powerful local tools).
+
+## Git Discipline (Mandatory)
+
+**Remote:** https://github.com/HiImSunny/vibeforge
+
+Git is the permanent, shareable record of all work. The local `plan/`, `spec/`, and `track/` files are the detailed human-readable log; git is the immutable history.
+
 ### Rules
 - **Never work directly on `main`/`master`** for feature work. Always create a branch named after the current plan (e.g. `plan/add-git-enforcement-to-agent-instructions-2025-06-07`).
 - After every meaningful step that produces code, docs, or configuration changes:
