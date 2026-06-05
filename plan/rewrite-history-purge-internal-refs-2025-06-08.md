@@ -109,7 +109,7 @@ Follow AGENT.md at every step. No direct main work. Every non-trivial change com
 
 ## Additional pass (2025-06-08, post initial DONE + merge to main)
 
-**Status:** IN_PROGRESS (follow-up to ensure 100% purge of strings from *commit messages*)
+**Status:** DONE ✅ (follow-up to ensure 100% purge of strings from *commit messages*)
 
 **Discovered after initial verification + merge:**
 - Current tree files: clean (good).
