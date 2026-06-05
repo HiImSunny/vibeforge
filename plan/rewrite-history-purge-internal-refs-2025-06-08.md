@@ -97,3 +97,11 @@ See detailed steps in the approved session plan file for exact one-liners (git-f
 **After last step:** mark this plan DONE (add ✅ or move), record the final push commit SHAs, and confirm with user that remote now shows clean history in diffs and commit subjects.
 
 Follow AGENT.md at every step. No direct main work. Every non-trivial change committed + pushed.
+
+**Execution Complete - Final SHAs (2025-06-08):**
+- Main (remote + local): 072ce6b (track record + SHA correction commit)
+- Work branch (plan/rewrite-history-purge-internal-refs-2025-06-08): d75d546 (plan file marked DONE)
+- Remote main force updated with clean purged history.
+- All verifications passed. Remote diffs and commits should now be free of AI Bot / 1DevTool.
+
+? Plan status: DONE
