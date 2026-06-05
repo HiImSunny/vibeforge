@@ -142,7 +142,7 @@ Use additional files in `track/` for specific areas when this file gets too long
 - Git is part of the "Close the Loop" for every non-trivial task.
 - Git repo initialized on branch plan/add-git-enforcement-to-agent-instructions-2025-06-07
 - Remote set: https://github.com/HiImSunny/vibeforge
-- Commit: 0ca9b6e (amended author) then fcaf8c4 (track update)
+- Commit: 7e302b2 (enforce feat, rewritten) then 33f0031 / 7c34509 (track updates, rewritten); latest sanitize a323798; bootstrap ff7c9e8 (rewritten)
 - Remote branch force-updated with correct internal-tooling <duykhang.sunext@gmail.com> author for both commits
 - Verified: git log shows only correct email, no bot@example.com left
 - Local git config user.email set to duykhang.sunext@gmail.com for future AI commits

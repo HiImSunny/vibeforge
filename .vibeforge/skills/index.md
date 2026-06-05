@@ -31,6 +31,9 @@ These skills are **in addition to** the core rules in `AGENT.md` (plan/spec/trac
 ### Meta
 - `create-skill.md` — How to create new project skills following this index and the overall workflow.
 
+### Full List of Installed Skills (from host ECC, adapted for Vibeforge)
+All files in this directory are available. Use the index above for quick reference; read full .md for details when activated.
+
 ## How to Use (for Agents)
 1. Read `AGENT.md` first (core rules always apply).
 2. Check this index for matching skills.
