@@ -347,7 +347,7 @@ Use additional files in `track/` for specific areas when this file gets too long
 - git log --all --oneline had no original internal names
 - git log --all -p -- '*.md' had no occurrences of the original strings in any hunk (the goal for "diff" views).
 - Current tree grep: clean.
-- New tip SHA (all three refs): a5f0932 (the redact commit, now with cleaned ancestry).
+- New tip SHA (main + historical plan ref): 4b41059 (track record commit; work plan branch continued to d75d546 for plan update).
 - Old cleanup commit messages now use replacements e.g. "(no internal-tooling or internal-tooling)" — acceptable generic.
 
 **Impact:**
