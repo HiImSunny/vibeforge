@@ -71,7 +71,11 @@ This makes the entire workflow fully traceable in both the local plan/spec/track
 
 ---
 
-**Post-Work Update (to be filled when done):**
-- Actual commit SHAs
-- Any deviations
-- Final status (DONE)
+**Post-Work Update (2025-06-07):**
+- **Status:** DONE
+- **Commit SHA:** 0b2b6e8
+- **Branch:** plan/add-git-enforcement-to-agent-instructions-2025-06-07
+- **Pushed to:** https://github.com/HiImSunny/vibeforge
+- **Deviations:** None. The change was self-applied following the new rule (including creating this plan first).
+- **Verification:** AGENT.md updated, git initialized with correct remote, change committed and pushed exactly as the new instructions require.
+- All future work in this repo must now follow the git rules added to AGENT.md.
