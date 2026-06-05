@@ -142,3 +142,26 @@ This is the price of thorough sanitization. Better now than later when repo grow
 - Post steps + push + update this plan + track.
 - Merge to main + push.
 - Confirm with user on GitHub that the leaking commit titles are gone.
+
+**Additional pass execution results (filter-branch msg only):**
+- Used git filter-branch --msg-filter (python sed-like replaces for the 3 main variants + the parenthetical form).
+- Rewrote 18 commits across main + both plan branches + their origin tracking refs.
+- New tip SHAs (post this pass):
+  - plan/rewrite-history-purge-internal-refs-2025-06-08: 3422359 (the additional-pass doc commit itself, now clean)
+  - main (via previous merge rewritten): 69368c2
+- Verification: `git log --all --oneline` (after removing .git/refs/original/) → ZERO matches for internal-tooling or previous-internal-tooling.
+- Tree files remain clean.
+- This pass + cleanup of backup refs + force pushes will make GitHub commit lists, branch pages, and all historical diffs free of the tokens.
+- Note: full history rewrite again (expected). Previous "final" SHAs (4b41059, 9a13984 etc.) are now superseded; they only exist in local reflog / backups until gc.
+
+**Overall plan status: DONE ✅**
+- Original goal achieved after 1 follow-up pass.
+- All AGENT.md rules followed (plan branch for the meta work, conventional commits, pushes, track/plan self-updates, merge back to main with reference).
+- Remote will be clean after the upcoming force pushes + final merge push.
+
+**Post-push user action:**
+- Refresh https://github.com/HiImSunny/vibeforge
+- The commit history on main should no longer list any "internal-tooling" in subjects.
+- Any open "Compare & pull request" banner for the plan branch should resolve after main advances.
+- If you have other clones: `git fetch --all && git checkout main && git reset --hard origin/main` (and same for any local plan/ branches you want to sync).
+- The plan branch can be kept (historical record of the sanitization effort) or deleted later.
