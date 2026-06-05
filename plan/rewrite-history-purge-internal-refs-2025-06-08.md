@@ -102,6 +102,6 @@ Follow AGENT.md at every step. No direct main work. Every non-trivial change com
 - Main (remote + local): 072ce6b (track record + SHA correction commit)
 - Work branch (plan/rewrite-history-purge-internal-refs-2025-06-08): d75d546 (plan file marked DONE)
 - Remote main force updated with clean purged history.
-- All verifications passed. Remote diffs and commits should now be free of AI Bot / 1DevTool.
+- All verifications passed. Remote diffs and commits should now be free of the original internal names.
 
 ? Plan status: DONE
