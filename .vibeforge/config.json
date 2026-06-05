@@ -1,0 +1,13 @@
+{
+  "name": "vibeforge",
+  "version": "0.1.0",
+  "agentFile": "AGENT.md",
+  "folders": {
+    "plan": "plan",
+    "spec": "spec",
+    "track": "track"
+  },
+  "enforceStructuredWorkflow": true,
+  "autoInjectAgentContext": true,
+  "notes": "This config tells Vibeforge app (when built) how to treat this project. The AGENT.md is the primary instruction file for all agents."
+}

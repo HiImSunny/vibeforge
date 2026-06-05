@@ -147,3 +147,35 @@ Use additional files in `track/` for specific areas when this file gets too long
 - Verified: git log shows only correct email, no bot@example.com left
 - Local git config user.email set to duykhang.sunext@gmail.com for future AI commits
 - This change was executed following the exact new rules it introduced (branch + commit message referencing plan + push).
+
+---
+
+## 2025-06-07 — Vibeforge Main Implementation Roadmap (Core Product Plan)
+
+**Status:** DONE
+
+**Plan:** plan/vibeforge-main-implementation-roadmap-2025-06-07.md
+
+**Actions:**
+- Created a comprehensive master roadmap plan that serves as the primary "plan chính" for the entire Vibeforge product.
+- Tied together all previous work: structured workflow (plan/spec/track + AGENT.md), UI design plan (must follow for anti-slop), git process.
+- Defined clear MVP scope based on earlier previous-internal-tooling feature selection (focused, not full clone).
+- Outlined phases with explicit requirement to create sub-plans before implementation.
+- Confirmed tech (Tauri), process (use relevant skills like tdd-workflow, rust-patterns, make-interfaces-feel-better, etc.).
+- Addressed user concerns: design first, no AI slop, Claude stop message handling in orchestration, git with correct email.
+- Prepared for new sessions: new agent sessions should load AGENT.md + latest track + this roadmap + the UI design plan as core context.
+
+**Verification:**
+- Master plan exists and is detailed, references all key artifacts.
+- Scope is focused and realistic.
+- Process discipline is reinforced (sub-plans required, follow existing AGENT.md).
+- Ready for user to create fresh session with the main plans.
+
+**Impact:**
+- User now has a clear, self-contained set of main plans to hand off to a new session for continued development without losing the big picture or the strict workflow.
+- Prevents drifting into full previous-internal-tooling bloat or backend-first mistakes.
+
+**Next:**
+- User can now safely create a new session.
+- In new session: start by reading AGENT.md + track/vibeforge-progress.md (latest) + plan/vibeforge-main-implementation-roadmap-2025-06-07.md + plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md.
+- Then create the first sub-plan (e.g., for Tauri init or Phase 1 workspace) following the roadmap.
