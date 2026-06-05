@@ -104,3 +104,41 @@ See detailed steps in the approved session plan file for exact one-liners (git-f
 - User should now see clean diffs on remote.
 
 Follow AGENT.md at every step. No direct main work. Every non-trivial change committed + pushed.
+
+---
+
+## Additional pass (2025-06-08, post initial DONE + merge to main)
+
+**Status:** IN_PROGRESS (follow-up to ensure 100% purge of strings from *commit messages*)
+
+**Discovered after initial verification + merge:**
+- Current tree files: clean (good).
+- But 4 commit messages still contained the literal strings (visible in `git log --oneline` and thus GitHub commit lists / "plan results"):
+  - 69ee57b: ... (no internal-tooling or internal-tooling)
+  - 0f694d9: ... previous-internal-tooling references ...
+  - 628d04b: ... previous-internal-tooling mentions
+  - 2542f67: ... previous-internal-tooling references from source ...
+- These were the "chore: sanitize..." and "docs: clean..." commits created during the process itself. Their messages described the removal using the old tokens → ironically left traces in history.
+
+**Actions:**
+- Switched back to this plan branch.
+- This section added to plan (self-documenting the iteration).
+- Will run one more targeted `git filter-repo` pass using only `--message-callback` (blobs already clean) to rewrite the 4 messages (and any other) removing the exact bad tokens.
+- Re-force-push main + this plan branch + the other historical plan branch.
+- Update track with new final SHAs + confirmation that `git log --all --oneline` now has zero matches.
+- Re-merge the (new) plan tip into main.
+- Mark this additional pass complete, overall plan DONE.
+
+**New verification target:**
+- `git log --all --oneline | Select-String -Pattern "internal-tooling|previous-internal-tooling"` → must be empty.
+- GitHub commit history / branch pages / any diff view must not show the old hyphenated tokens.
+
+**Risk:** Another full history rewrite (all SHAs will change again, including the merge commit 9a13984 and previous "final" 4b41059). Old recorded SHAs become historical only. Users with clones must re-clone or `git fetch && git reset --hard origin/main` (and same for any plan branches they have).
+
+This is the price of thorough sanitization. Better now than later when repo grows.
+
+**Next immediate:**
+- Prepare callback + run filter-repo.
+- Post steps + push + update this plan + track.
+- Merge to main + push.
+- Confirm with user on GitHub that the leaking commit titles are gone.
