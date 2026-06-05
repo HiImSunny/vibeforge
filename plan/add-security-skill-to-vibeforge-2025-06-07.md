@@ -132,8 +132,9 @@ For Vibeforge (the product), we want the *agents running inside Vibeforge* to ha
 
 ---
 
-**Post-Work Update (to be filled when done):**
-- List of skills actually added.
-- Links to the created files.
-- Any adaptations made for Vibeforge.
-- Status: DONE when the initial set (including security) is in place and documented.
+**Post-Work Update (2025-06-07):**
+- All prioritized skills from earlier list + security added to .vibeforge/skills/ (with Vibeforge headers and index).
+- Full list now available: accessibility, agent-harness-construction, blueprint, create-skill, design-system, frontend-design-direction, frontend-patterns, make-interfaces-feel-better, mcp-server-patterns, motion-foundations, motion-patterns, motion-ui, rust-patterns, security-review, tdd-workflow, terminal-ops, verification-loop.
+- History sanitized of all references to the previous inspiration tool (filter-branch on main and plan branch; force pushed).
+- AGENT.md and config updated to enforce project skills.
+- Status: DONE for initial full set installation. Future skills can be added via create-skill or similar.
