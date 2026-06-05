@@ -73,7 +73,7 @@ This makes the entire workflow fully traceable in both the local plan/spec/track
 
 **Post-Work Update (2025-06-07):**
 - **Status:** DONE
-- **Commit SHA:** 7e302b2 (history rewritten to remove previous tool refs)
+- **Commit SHA:** ef8185c (latest clean after full history rewrite for messages too)
 - **Branch:** plan/add-git-enforcement-to-agent-instructions-2025-06-07
 - **Pushed to:** https://github.com/HiImSunny/vibeforge
 - **Deviations:** None. The change was self-applied following the new rule (including creating this plan first).

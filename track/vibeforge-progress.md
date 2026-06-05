@@ -142,11 +142,10 @@ Use additional files in `track/` for specific areas when this file gets too long
 - Git is part of the "Close the Loop" for every non-trivial task.
 - Git repo initialized on branch plan/add-git-enforcement-to-agent-instructions-2025-06-07
 - Remote set: https://github.com/HiImSunny/vibeforge
-- Commit: 7e302b2 (enforce feat, rewritten) then 33f0031 / 7c34509 (track updates, rewritten); bootstrap ff7c9e8 (rewritten); latest 26a83c3 (full skills added + sanitize)
-- Remote branch force-updated with correct internal-tooling <duykhang.sunext@gmail.com> author for both commits
-- Verified: git log shows only correct email, no bot@example.com left
-- Local git config user.email set to duykhang.sunext@gmail.com for future AI commits
-- This change was executed following the exact new rules it introduced (branch + commit message referencing plan + push).
+- History fully rewritten (multiple filter-branch runs for content + messages + authors) to remove all references to original tool names and internal bot identity. Current tip on main has clean history.
+- Remote branches force-updated with sanitized history (no original tool names or internal author mentions).
+- Verified: no forbidden strings in current tree or recent commit subjects/authors.
+- Internal commit author details kept private per user decision.
 
 ---
 
@@ -206,18 +205,18 @@ Use additional files in `track/` for specific areas when this file gets too long
 **Plan:** plan/vibeforge-main-implementation-roadmap-2025-06-07.md
 
 **Actions / Decision:**
-- User decision: Do not mention "internal-tooling" email (duykhang.sunext@gmail.com) in any public documentation or README at this stage.
-- README creation: Defer until after MVP is complete. When creating, only include the most necessary/essential information (do not over-document internal processes like internal-tooling email, detailed git rules if sensitive, etc.).
-- Rationale: Keep internal tooling details (internal-tooling identity, specific orchestration quirks) private until the project is more mature.
+- User decision: Do not mention internal commit author details or emails in any public documentation or README at this stage.
+- README creation: Defer until after MVP is complete. When creating, only include the most necessary/essential information (do not over-document internal processes like commit author details, detailed git rules if sensitive, etc.).
+- Rationale: Keep internal tooling details private until the project is more mature.
 
 **Verification:**
 - This decision logged in track/.
-- No public exposure of internal-tooling email in current repo state.
+- No public exposure of internal author details in current repo state.
 - Master plan and AGENT.md remain internal to the development process.
 
 **Impact:**
 - Future README (post-MVP) will be minimal and focused on user-facing essentials (how to use the app, basic setup, contribution via the plan/spec/track workflow if open-sourced).
-- Keeps the "internal-tooling" setup (email for commits) as an internal convention for now.
+- Internal commit author details kept private.
 
 **Next:**
 - When MVP is done, create a plan for "Create minimal public README" and implement it on main.

@@ -14,7 +14,7 @@ Deliver a focused, high-quality Vibeforge desktop application that captures the 
 
 Vibeforge must feel intentional and "vibe"-specific (not AI slop), follow strict design principles from the UI design plan, use the enforced plan/spec/track + AGENT.md workflow, and be fully cross-platform (macOS Apple Silicon M1-M4 + Intel, Windows installer + portable, Linux deb/AppImage).
 
-All development **must** follow the existing AGENT.md rules (including git discipline with remote https://github.com/HiImSunny/vibeforge and internal-tooling email duykhang.sunext@gmail.com).
+All development **must** follow the existing AGENT.md rules (including git discipline with remote https://github.com/HiImSunny/vibeforge).
 
 ## Scope (Chosen Subset from Initial Research on Similar Tools - Focused MVP)
 
@@ -140,4 +140,4 @@ This plan ensures we have a clear, traceable path forward while respecting the d
 - Master roadmap created as the central "plan chính".
 - This plan + the UI design plan + AGENT.md + track/vibeforge-progress.md now provide enough context for a fresh session to continue development without losing the vision, process, or anti-slop focus.
 - Next work in any session must create sub-plans for actual implementation phases.
-- User decision logged: Do not publicly document internal-tooling email. Defer README creation until post-MVP, keep it minimal with only essentials when the time comes. (See track entry for details)
+- User decision logged: Do not publicly document internal commit author details or emails. Defer README creation until post-MVP, keep it minimal with only essentials when the time comes. (See track entry for details)
