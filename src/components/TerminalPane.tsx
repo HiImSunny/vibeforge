@@ -79,9 +79,8 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
       onData?.(data);
     });
 
-    // Focus visual + keyboard routing note
-    term.onFocus(() => setIsFocused(true));
-    term.onBlur(() => setIsFocused(false));
+    // Focus visual is primarily driven by the outer .vf-pane.active class (from parent click).
+    // xterm shows its own cursor when it has keyboard focus. We call focus() on wrapper click.
 
     // Initial prompt hint (stub)
     term.write("\r\n$ vibeforge terminal (local echo — real PTY in next slice)\r\n> ");

@@ -129,7 +129,7 @@ export default function VibeforgeShell() {
                     id={i}
                     title={titles[i] || `${i} • (stub)`}
                     accent={accents[i] || "general"}
-                    onData={(data) => {
+                    onData={() => {
                       // Stub: in next slice this will invoke Tauri command to write to real PTY.
                       // For now the component does local echo; we just surface activity.
                       if (i === 0 && launched.length > 0) {
