@@ -710,8 +710,9 @@ All strictly following AGENT.md.
 
 **Git (this step):**
 - Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09 (enforced, confirmed at session start and before commit).
-- Commit: 893a958 (feat(phase2): topbar agent buttons now spawn real PTYs ...)
-- Push: `git push -u origin plan/vibeforge-phase2-terminals-pty-2025-06-09` → 008a644..893a958
-- This track entry was part of the commit; SHA recorded here post-push for traceability.
+- Commit (main): 893a958 (feat(phase2): topbar agent buttons now spawn real PTYs ...)
+- Commit (record): 86978d8 (chore: record push SHA ...)
+- Push: `git push -u origin ...` (tracking set) → latest tip 86978d8 on the plan branch.
+- SHAs recorded here + in plan post-work. All per mandatory Git Discipline.
 
 All per AGENT.md + Phase 2 plan + security-review skill. The heart (real terminals + agent launch) continues to solidify in traceable increments.
