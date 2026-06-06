@@ -183,4 +183,38 @@ This plan ensures Phase 2 starts with the same discipline that got us a clean, p
 - Status when closed (after final commit/push in session): Core terminals + agent button functionality + basic lifecycle (launch / +New / close) delivered in the existing 2x2 grid. Plan can be considered substantially complete for the "Terminals & real PTY" heart; orchestration or further polish can be next slice or separate narrow plan per master roadmap.
 - Notes for next session: load AGENT.md + latest track/vibeforge-progress.md + this plan + UI design plan + master roadmap. Stay on plan/vibeforge-phase2-terminals-pty-2025-06-09. Update track + commit after every meaningful slice.
 
+---
+
+## Evolved Approach (Continuation - June 2025, user request)
+
+During execution, the user requested significant improvements for real usability:
+
+**Key Changes from Original Scope:**
+- **Removed hard limit of 4 terminals / 2x2 grid.** The original plan targeted "wire the existing 2x2 grid". This was evolved because "không thể giới hạn là 4 terminal".
+- **New model: Dynamic list of terminals + single focused viewer at a time.**
+  - Terminals are managed as a list (add unlimited).
+  - Only one terminal is "focused" / prominently displayed in the main viewer area.
+  - Background terminals continue running their PTY in Rust (listeners can re-attach when focused again).
+  - This provides better density and scales to many agents (common in real multi-agent workflows).
+- **Architecture improvement:** Move PTY creation responsibility to the App level (explicit `create_terminal` when adding a session). TerminalPane becomes a "viewer" for an existing ptyId (listen + write + fit only). This allows switching focus without killing background PTYs.
+- **Topbar agents:** Now create a *new* dedicated terminal for the chosen agent (instead of overwriting an existing slot). Fits the unlimited model.
+- **+ New and close:** Create new default shell, or remove + kill specific session.
+- Additional polish requested: keyboard navigation for the list, activity signals, minimal "send context" from FileTree into the focused terminal.
+
+**Why this evolution is good:**
+- Matches real usage (developers often have 5-10+ agent shells open, but focus on one or two at a time).
+- Keeps the calm, high-density spirit of the UI design plan.
+- The Rust PTY manager already supported multiple concurrent PTYs from day one — the frontend just needed to expose it properly.
+- Still fully within the spirit of Phase 2 ("Terminal & Agent System (The Heart)").
+
+This change is documented here and will be tracked in `track/vibeforge-progress.md`. All future work on this plan branch must push regularly.
+
+**Updated Scope Note:**
+- In: Dynamic terminal sessions (unlimited), list + focused viewer, keyboard switching, basic activity, FileTree → focused terminal paste.
+- Out (still): Full multi-visible layouts (tabs with visible split, drag, persisted), rich orchestration UI, etc. (those can come in follow-up slices or Phase 3+).
+
+All work continues to obey AGENT.md, the UI design plan, and security-review for any PTY-related logic.
+
+## Post-Work Update (filled during execution) - continued
+
 All work follows Vibeforge AGENT.md. We are building the real product, not meta. Security and the "calm technical purposeful" design direction are enforced at every step.

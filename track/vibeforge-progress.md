@@ -761,3 +761,43 @@ All per AGENT.md + Phase 2 plan + security-review skill. The heart (real termina
 - When comfortable, mark the Phase 2 plan as substantially delivered for the terminal core and update master roadmap tracking.
 
 All strictly per AGENT.md. Small steps, security considered, design direction respected.
+
+---
+
+## 2025-06-10 — Phase 2 evolution: Dynamic terminal list + single focus (no more 4 limit) + start orchestration prep
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/vibeforge-phase2-terminals-pty-2025-06-09.md (updated with "Evolved Approach" section)
+**Context:** User explicitly requested during review: "đâu thể giới hạn là 4 terminal được, làm dạng list terminal và mỗi lần chỉ focus vào 1 terminal thôi". Also "làm cái 1 và 2" (strengthen terminals + begin orchestration), push regularly, and asked about main branch status on remote.
+
+**Decisions:**
+- Evolve away from fixed 2x2 grid (original plan target) to dynamic list of PTY sessions + one focused viewer. This is documented as user-driven evolution in the plan file itself.
+- Architecture: PTY creation moves to App level (explicit invoke when +New or agent launch). TerminalPane becomes a pure viewer/attacher for a given ptyId (no more auto-create on mount). This allows unlimited background PTYs that stay alive when not focused.
+- Topbar agents will create *new* terminals (better for many agents).
+- For "củng cố terminal" (item 1): Add keyboard nav (list arrows + 1-9 keys), activity signals on list items (subtle on new output), minimal send-context (FileTree onFileOpen writes path to currently focused terminal), better initial fit.
+- For "bắt đầu orchestration" (item 2): Create a proper sub-plan artifact before implementing CLI/delegation pieces.
+- Git: Push after every meaningful slice (plan update, core refactor, polish, new plan). All on the current plan branch.
+- Main branch on remote: Intentionally unchanged. Per AGENT.md "Git Discipline", all feature work (including entire Phase 2) happens on dedicated `plan/vibeforge-phase2-terminals-pty-2025-06-09` branch. `main` is the stable integration target. We will merge (with reference to plan) when a phase or big deliverable is ready. This is by design and correct.
+
+**Actions so far (this session):**
+- Re-read AGENT.md, latest track, current Phase 2 plan, source files.
+- Updated plan/vibeforge-phase2-terminals-pty-2025-06-09.md with Evolved Approach section + scope note (user request documented transparently).
+- Created todo list for the evolution work.
+- (Next) Append this track entry, then implement the refactor in small steps with builds + commits in between.
+
+**Risks noted:**
+- Switching focus model requires careful PTY lifecycle (decoupled create/kill).
+- Loss of "always-visible 4 panes" — user accepted for better scalability and focus.
+- Still no persistence (out of scope).
+
+**Verification plan:**
+- After refactor: cargo check + npm run build.
+- Manual: unlimited terminals, switch focus, agent creates new, background PTY keeps running (can switch back), keyboard works, FileTree send works on focused.
+- Regular push.
+
+**Git:**
+- Branch remains plan/vibeforge-phase2-terminals-pty-2025-06-09.
+- Will push the plan update + this track shortly, then code changes in follow-up commits.
+
+All per AGENT.md + security-review for PTY. Continuing to make the terminal heart actually usable at scale.
