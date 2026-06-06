@@ -920,6 +920,11 @@ All per Vibeforge AGENT.md (plan/spec/track + git + security for PTY/orchestrati
 - Followed: sub-plan priorities 1+2, calm technical UI (reuse .vf-input/.vf-btn, dense, no new slop), controlled paths only (no new exec), references to both plans in future commit.
 - Builds verified before commit. Security mindset applied (transform only; PTY output from allow-listed spawns).
 
-**Next (still in this IN_PROGRESS):** begin capture output (buffer in PtyManager + get cmd + "Capture+strip" gesture) or real-output verification + track/commit/push for this slice. Regular push enforced.
+**Git (this slice):**
+- Commit: 44873a8 (feat(phase2-orchestration): expand strip... + Quick Delegate...)
+- Push: succeeded (059cefc..44873a8 on plan/vibeforge-phase2-terminals-pty-2025-06-09)
+- SHA recorded here + will be in sub-plan post-work. Message references sub-plan + main Phase 2 plan + track per AGENT.md.
+
+**Next (still in this IN_PROGRESS):** begin capture output (buffer in PtyManager + get cmd + "Capture+strip" gesture) or real-output verification with Claude samples + track/commit/push for this slice. Regular push enforced.
 
 All per AGENT.md + sub-plan + Phase 2 main plan.
