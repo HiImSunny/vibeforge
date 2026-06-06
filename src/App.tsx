@@ -1,49 +1,13 @@
 import { useState } from "react";
 import "./App.css";
+import FileTree from "./components/FileTree";
 
 /**
- * Vibeforge — Phase 0 minimal purposeful workspace shell
+ * Vibeforge — Phase 0 shell + Phase 1 live file tree
  *
- * Design sources (per plan + AGENT.md):
- * - plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md
- * - .vibeforge/skills/frontend-design-direction.md
- * - .vibeforge/skills/make-interfaces-feel-better.md
- *
- * Goals for this bootstrap:
- * - First viewport = real tool surface (no marketing, no logos, no slop)
- * - Calm technical, dense, scannable
- * - Sidebar makes plan/spec/track/AGENT.md first-class and visible
- * - Agent launchers present (non-functional stubs)
- * - Terminal grid placeholder + context panels
- * - Concrete polish: concentric radius, good hit areas, subtle borders for separation, optical alignment
+ * Now with real disk-backed tree (Phase 1) that prioritizes plan/spec/track/AGENT.md
+ * and supports quick-create that writes actual files.
  */
-
-interface Agent {
-  id: string;
-  label: string;
-  accent: string;
-}
-
-const AGENTS: Agent[] = [
-  { id: "claude", label: "claude", accent: "claude" },
-  { id: "codex", label: "codex", accent: "codex" },
-  { id: "gemini", label: "gemini", accent: "gemini" },
-  { id: "aider", label: "aider", accent: "general" },
-];
-
-const STRUCTURED_FOLDERS = [
-  { name: "plan/", hint: "implementation plans" },
-  { name: "spec/", hint: "requirements & contracts" },
-  { name: "track/", hint: "living project history" },
-  { name: "AGENT.md", hint: "the one-file agent (mandatory)" },
-];
-
-const FAKE_FILES = [
-  "src-tauri/src/main.rs",
-  "src/App.tsx",
-  "vite.config.ts",
-  "tauri.conf.json",
-];
 
 export default function VibeforgeShell() {
   const [activePane, setActivePane] = useState(0);
@@ -103,32 +67,24 @@ export default function VibeforgeShell() {
       </div>
 
       <div className="vf-main">
-        {/* Left sidebar — project + structured workflow (core differentiator) */}
+        {/* Left sidebar — live file tree (Phase 1) with structured workflow first-class treatment */}
         <div className="vf-sidebar">
           <div className="vf-sidebar-header">CURRENT PROJECT</div>
           <div style={{ padding: "6px 10px", fontSize: 12, fontWeight: 500, borderBottom: "1px solid var(--vf-border)" }}>
             vibeforge <span className="vf-badge">main</span>
           </div>
 
-          <div className="vf-sidebar-header" style={{ marginTop: 8 }}>STRUCTURED WORKFLOW</div>
-          {STRUCTURED_FOLDERS.map((f, idx) => (
-            <div key={idx} className="vf-folder structured" title={f.hint}>
-              <span>📁</span> {f.name}
-            </div>
-          ))}
+          <div className="vf-sidebar-header" style={{ marginTop: 4 }}>STRUCTURED WORKFLOW + FILES (live)</div>
 
-          <div className="vf-sidebar-header" style={{ marginTop: 8 }}>FILES (stub)</div>
-          {FAKE_FILES.map((f, i) => (
-            <div key={i} className="vf-folder" style={{ opacity: 0.85 }}>
-              <span>📄</span> {f}
-            </div>
-          ))}
+          <FileTree
+            onFileOpen={(p) => setStatus(`Opened (stub): ${p}`)}
+            onRefresh={() => setStatus("Tree refreshed • real disk")}
+          />
 
           <div style={{ flex: 1 }} />
 
           <div style={{ padding: 8, fontSize: 10, color: "var(--vf-muted)", borderTop: "1px solid var(--vf-border)" }}>
-            plan/spec/track enforced<br />
-            (native support in Phase 1)
+            Real readDir + writeTextFile • structured folders prioritized • quick-create writes .md
           </div>
         </div>
 

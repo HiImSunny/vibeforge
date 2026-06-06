@@ -5,6 +5,10 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:default"
+    "opener:default",
+    "fs:default",
+    "fs:read-dir",
+    "fs:read-text-file",
+    "fs:write-text-file"
   ]
 }
