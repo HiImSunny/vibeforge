@@ -927,4 +927,6 @@ All per Vibeforge AGENT.md (plan/spec/track + git + security for PTY/orchestrati
 
 **Next (still in this IN_PROGRESS):** begin capture output (buffer in PtyManager + get cmd + "Capture+strip" gesture) or real-output verification with Claude samples + track/commit/push for this slice. Regular push enforced.
 
-All per AGENT.md + sub-plan + Phase 2 main plan.
+**Session close note (2025-06-10):** All mandated reads done at open. IN_PROGRESS entry appended *before any code*. Two priorities (expand strip + strengthen Quick Delegate with context+target) delivered in small steps with build verifies between. 3 commits + 3 pushes on the plan branch (SHAs: 44873a8 feat, 2d18376 record, bc8a6f3 docs plan update). Sub-plan post-work + main track updated. Security + design direction + AGENT.md Git/plan-first discipline followed exactly. No capture impl this slice (delegate was the explicit near-term goal); ready for immediate next micro on same branch.
+
+All per AGENT.md + sub-plan + Phase 2 main plan. Tree clean at end.
