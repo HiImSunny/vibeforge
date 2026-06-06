@@ -46,6 +46,7 @@ export default function VibeforgeShell() {
   // Dynamic list of terminals (unlimited). Only one is focused at a time.
   const [terminals, setTerminals] = useState<TerminalSession[]>([]);
   const [focusedPtyId, setFocusedPtyId] = useState<string | null>(null);
+  const [delegatePrompt, setDelegatePrompt] = useState(""); // for orchestration foundation quick delegate
 
   // Helper to create a new terminal session (explicit create in Rust first).
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
@@ -304,10 +305,60 @@ export default function VibeforgeShell() {
             </button>
           </div>
 
+          {/* Orchestration foundation: minimal "Quick Delegate" gesture */}
+          <div className="vf-context-item" style={{ borderTop: "1px solid var(--vf-border)", paddingTop: 8 }}>
+            <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 11 }}>Quick Delegate (foundation)</div>
+            <textarea
+              value={delegatePrompt}
+              onChange={(e) => setDelegatePrompt(e.target.value)}
+              placeholder="Describe the task for the agent..."
+              style={{ width: "100%", minHeight: 48, fontSize: 11, background: "var(--vf-surface)", border: "1px solid var(--vf-border)", color: "var(--vf-text)", padding: 4, borderRadius: 3 }}
+            />
+            <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
+              <button
+                className="vf-btn"
+                style={{ fontSize: 10, padding: "2px 6px", flex: 1 }}
+                disabled={!focusedPtyId || !delegatePrompt.trim()}
+                onClick={async () => {
+                  if (!focusedPtyId) return;
+                  const taskMsg = `Task:\n${delegatePrompt.trim()}\n\nPlease complete this task. Use any provided context.`;
+                  try {
+                    await invoke("write_to_terminal", { id: focusedPtyId, data: taskMsg + "\n" });
+                    setStatus(`Task sent to ${focusedPtyId}`);
+                    setDelegatePrompt("");
+                  } catch (e: any) {
+                    setStatus(`Delegate failed: ${e}`);
+                  }
+                }}
+              >
+                Send task to focused
+              </button>
+              <button
+                className="vf-btn"
+                style={{ fontSize: 10, padding: "2px 6px" }}
+                onClick={async () => {
+                  // Demo the strip foundation command with sample output
+                  const sample = "Here is my analysis...\n\nClaude Code has stopped";
+                  try {
+                    const cleaned: string = await invoke("strip_claude_stop_messages", { output: sample });
+                    setStatus(`Strip demo: ${cleaned}`);
+                  } catch (e: any) {
+                    setStatus(`Strip failed: ${e}`);
+                  }
+                }}
+              >
+                Demo strip
+              </button>
+            </div>
+            <div style={{ fontSize: 9, color: "var(--vf-muted)", marginTop: 2 }}>
+              Writes formatted task to focused terminal. Strip util ready for clean capture.
+            </div>
+          </div>
+
           <div style={{ flex: 1 }} />
 
           <div style={{ padding: 10, fontSize: 10, color: "var(--vf-muted)", borderTop: "1px solid var(--vf-border)" }}>
-            Drag files / terminal output / browser here to send context (future)
+            Drag files / terminal output / browser here to send context (future). Orchestration foundation active.
           </div>
         </div>
       </div>

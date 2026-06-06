@@ -52,6 +52,11 @@ Follow AGENT.md: security-review for any execution, small steps, regular push.
 
 ## Post-Work (to be filled)
 - Sub-plan created.
-- First foundation implementation (stripping + basic run).
-- Integration gesture in terminal list / FileTree.
-- Commits + SHAs recorded in track.
+- First foundation implementation:
+  - Added `strip_claude_stop_messages` Tauri command in Rust (lib.rs) with common stop phrases + marker. Registered and security-commented.
+  - Enhanced right "CONTEXT • SEND TO AGENT" panel with "Quick Delegate" foundation gesture: textarea for task + "Send task to focused" (formats and writes via existing write_to_terminal to the focused ptyId). Also "Demo strip" button using the new command on sample output.
+- Used the dynamic terminal list + focused viewer for the delegation target (no new execution surface).
+- cargo check + npm run build clean.
+- Commits + pushes on plan branch with references to sub-plan.
+- Track updated.
+- Next: more gestures, actual output capture for stripped results, decide on CLI vs in-app.

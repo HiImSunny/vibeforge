@@ -8,6 +8,7 @@
 // - PTY handles are kept in a process-local map; output is streamed only to the
 //   requesting pane via Tauri events (never exposed globally without auth in future).
 // - Kill on drop / explicit kill to avoid orphan processes.
+// - For orchestration: stripping is read-only transformation on output; no new execution paths.
 
 use portable_pty::{native_pty_system, CommandBuilder, PtyPair, PtySize};
 use std::collections::HashMap;
@@ -172,6 +173,34 @@ fn kill_terminal(state: State<'_, Arc<PtyManager>>, id: String) -> Result<(), St
     Ok(())
 }
 
+/// Orchestration foundation: strip common agent stop/termination messages
+/// so captured output is clean for further use (e.g. pasting back, diff, delegation).
+/// This is a pure transformation; no execution side effects.
+#[tauri::command]
+fn strip_claude_stop_messages(output: String) -> String {
+    // Common stop phrases from Claude Code and similar tools (expand as needed).
+    // We truncate at the first match for clean "final answer" style output.
+    let stop_phrases = [
+        "Claude Code has stopped",
+        "Claude has stopped",
+        "The command has stopped",
+        "has stopped",
+        "Session ended",
+        "Agent stopped",
+    ];
+
+    let mut cleaned = output;
+    for phrase in stop_phrases {
+        if let Some(pos) = cleaned.find(phrase) {
+            cleaned = cleaned[..pos].trim_end().to_string();
+            // Append a marker so callers know stripping happened (useful for debugging/foundation).
+            cleaned.push_str("\n[orchestration: stop message stripped]");
+            break;
+        }
+    }
+    cleaned
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -182,7 +211,8 @@ pub fn run() {
             create_terminal,
             write_to_terminal,
             resize_terminal,
-            kill_terminal
+            kill_terminal,
+            strip_claude_stop_messages
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

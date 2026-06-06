@@ -817,3 +817,52 @@ All strictly per AGENT.md. Small steps, security considered, design direction re
 - SHA to be recorded.
 
 All per AGENT.md. The terminal list is now polished and ready.
+
+**Orchestration foundation start (this slice):**
+- Added `strip_claude_stop_messages` Tauri command (Rust) — strips common Claude stop phrases, appends marker. Pure transform, registered, security noted.
+- UI gesture in right panel ("Quick Delegate" under CONTEXT • SEND TO AGENT): textarea + "Send task to focused" button that formats a clear task message and writes to the currently focused terminal (via existing write path). "Demo strip" button exercises the new command on sample output and shows result in status.
+- Leverages the dynamic terminal list + focused viewer (agent terminals are natural targets).
+- No new PTY execution; re-uses controlled surfaces.
+- Builds: cargo check ✓, npm run build ✓.
+- Follows sub-plan steps 2-4 for foundation (surface decision: Tauri commands on top of PTY; core strip + minimal UI gesture).
+
+**Git:**
+- Will push with reference to sub-plan + main Phase 2 plan.
+
+---
+
+## 2025-06-10 — Switch to Orchestration Foundation (Phase 2 sub-work)
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/vibeforge-phase2-orchestration-foundation-2025-06-10.md (sub-plan) + plan/vibeforge-phase2-terminals-pty-2025-06-09.md (main, with evolved scope)
+
+**Actions:**
+- Read sub-plan, latest track entries, main Phase 2 plan (evolved section), AGENT.md.
+- Created todo list for the foundation slice.
+- Updated this track with dedicated entry for the switch.
+- (Next) Update main plan post-work briefly.
+- Start implementation per sub-plan approach: decide on Tauri command surface (re-using existing PTY manager for visible agent sessions first). Implement core stripping + minimal UI gesture in the existing "CONTEXT • SEND TO AGENT" panel to "delegate" a task/prompt to the focused agent terminal.
+- Security: reuse controlled PTY paths only; no new arbitrary execution.
+
+**Decisions:**
+- For this foundation slice: focus on in-app visible delegation using the dynamic terminal list (agent terminals). Prepare stripping utility that can be used for clean output capture later. Headless vibeforge-agent CLI and advanced routing deferred (as per sub-plan Out).
+- Stripping: implement in Rust (close to PTY layer) as `strip_claude_stop_messages`.
+- UI gesture: simple textarea + "Send task to focused" in right panel that formats a clear prompt and writes via existing write_to_terminal. This exercises "send context + run".
+- Will push after each small step (strip command, UI integration, verification).
+
+**Risks (from sub-plan):**
+- Stop phrases brittle → start with common ones + comment for expansion.
+- User may want to see raw in terminal (so strip on "capture" side, not mutate the live PTY output stream yet).
+
+**Verification targets:**
+- New command registered and callable.
+- Can launch an agent terminal, use the delegate UI to send a task, see formatted input in the terminal.
+- Build + check clean.
+- Track + commits reference the sub-plan.
+
+**Git:**
+- All on plan/vibeforge-phase2-terminals-pty-2025-06-09.
+- Will commit + push regularly.
+
+All strictly per AGENT.md, sub-plan, and security for execution surfaces. Moving from terminal polish to the orchestration half of Phase 2.

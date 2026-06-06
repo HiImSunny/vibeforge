@@ -217,4 +217,11 @@ All work continues to obey AGENT.md, the UI design plan, and security-review for
 
 ## Post-Work Update (filled during execution) - continued
 
+**2025-06-10 continuation:**
+- Switched to orchestration foundation per user request ("chuyển sang orchestration foundation").
+- Created and started dedicated sub-plan: plan/vibeforge-phase2-orchestration-foundation-2025-06-10.md
+- Began with core stripping utility + minimal UI gesture for delegation (using the existing dynamic terminal list and PTY write path).
+- Regular commits/pushes on the plan branch.
+- Track updated with dedicated section.
+
 All work follows Vibeforge AGENT.md. We are building the real product, not meta. Security and the "calm technical purposeful" design direction are enforced at every step.
