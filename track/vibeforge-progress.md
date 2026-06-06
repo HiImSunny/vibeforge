@@ -709,7 +709,9 @@ All strictly following AGENT.md.
 - If orchestration slice wanted inside Phase 2: create narrow sub-plan or continue here; otherwise mark this plan DONE after final push and move per master roadmap.
 
 **Git (this step):**
-- Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09 (enforced).
-- Will produce commit(s) after track update.
+- Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09 (enforced, confirmed at session start and before commit).
+- Commit: 893a958 (feat(phase2): topbar agent buttons now spawn real PTYs ...)
+- Push: `git push -u origin plan/vibeforge-phase2-terminals-pty-2025-06-09` → 008a644..893a958
+- This track entry was part of the commit; SHA recorded here post-push for traceability.
 
 All per AGENT.md + Phase 2 plan + security-review skill. The heart (real terminals + agent launch) continues to solidify in traceable increments.
