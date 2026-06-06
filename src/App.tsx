@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import FileTree from "./components/FileTree";
+import TerminalPane from "./components/TerminalPane";
 
 /**
  * Vibeforge — Phase 0 shell + Phase 1 live file tree
@@ -39,12 +40,9 @@ export default function VibeforgeShell() {
     setActivePane(i);
   }
 
-  const terminalPanes = [
-    { id: 0, title: "1 • claude-3.5-sonnet • idle", output: "$ vibeforge shell ready\n> plan/ and track/ visible in sidebar\n> send context from any pane (stub)\n" },
-    { id: 1, title: "2 • (empty)", output: "Right-click → New Terminal (Phase 2)\nGrid / split / tabs coming in layout system.\n" },
-    { id: 2, title: "3 • (empty)", output: "" },
-    { id: 3, title: "4 • (empty)", output: "" },
-  ];
+  // Phase 2: real xterm-backed panes (local echo stub for this slice; real PTY + Rust manager next).
+  // Titles and accents match the topbar launchers. onData forwards (currently echo only).
+  const terminalSlots = [0, 1, 2, 3];
 
   return (
     <div className="vf-root">
@@ -113,26 +111,36 @@ export default function VibeforgeShell() {
           </div>
 
           <div className="vf-terminal-grid">
-            {terminalPanes.map((p, i) => (
-              <div
-                key={i}
-                className={`vf-pane ${activePane === i ? "active" : ""}`}
-                onClick={() => selectPane(i)}
-              >
-                <div className="vf-pane-header">
-                  <span className="label">{p.title}</span>
-                  <span style={{ fontSize: 10, color: "#4b5563" }}>{activePane === i ? "FOCUSED" : ""}</span>
+            {terminalSlots.map((i) => {
+              const titles = [
+                "1 • claude-3.5-sonnet • idle",
+                "2 • (shell)",
+                "3 • (empty)",
+                "4 • (empty)",
+              ];
+              const accents = ["claude", "general", "general", "general"];
+              return (
+                <div
+                  key={i}
+                  className={`vf-pane ${activePane === i ? "active" : ""}`}
+                  onClick={() => selectPane(i)}
+                >
+                  <TerminalPane
+                    id={i}
+                    title={titles[i] || `${i} • (stub)`}
+                    accent={accents[i] || "general"}
+                    onData={(data) => {
+                      // Stub: in next slice this will invoke Tauri command to write to real PTY.
+                      // For now the component does local echo; we just surface activity.
+                      if (i === 0 && launched.length > 0) {
+                        setStatus(`${launched.length} agents • input sent to pane ${i}`);
+                      }
+                    }}
+                    onClose={() => setStatus(`Closed pane ${i} (stub — real PTY kill later)`)}
+                  />
                 </div>
-                <div className="vf-pane-body">
-                  {p.output || "(empty — real output will stream here)"}
-                  {i === 0 && launched.length > 0 && (
-                    <div style={{ marginTop: 12, color: "#7be38f" }}>
-                      {launched.map(l => `[${l}] agent ready to receive context`).join("\n")}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
