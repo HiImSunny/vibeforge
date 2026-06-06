@@ -751,8 +751,9 @@ All per AGENT.md + Phase 2 plan + security-review skill. The heart (real termina
 - Keeps the "fixed 4 grid" contract of the original shell; everything is still purposeful and calm.
 
 **Git:**
-- Will commit + push immediately after this track note (message references plan + track).
-- New SHAs to be recorded here post-push.
+- Commit: f8551c7 (feat(phase2): make ✕ close buttons functional ...)
+- Push succeeded (remote advanced 6fbf6bd..f8551c7).
+- SHA recorded here for the slice. All per AGENT.md Git Discipline.
 
 **Next (from plan):**
 - More polish if desired (keyboard navigation between panes, subtle activity, better initial cols/rows handshake, or send-context from tree).
