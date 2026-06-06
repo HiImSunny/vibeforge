@@ -548,3 +548,59 @@ The user explicitly asked for the final complete product and to "just do it acco
 - Goal remains the complete, focused, non-slop multi-agent desktop workspace the original roadmap described.
 
 The drive toward the final complete product continues. All per AGENT.md.
+
+---
+
+## 2025-06-09 — Phase 2 Plan Created: Terminals & Real PTY
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/vibeforge-phase2-terminals-pty-2025-06-09.md
+**Related:** plan/vibeforge-main-implementation-roadmap-2025-06-07.md (Phase 2), plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md (MUST), previous phase0/phase1 plans, AGENT.md
+
+**Context (session start — mandatory per AGENT.md):**
+- Read AGENT.md (full), track/vibeforge-progress.md (latest entry), plan/vibeforge-main-implementation-roadmap-2025-06-07.md, plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md, plan/vibeforge-tauri-bootstrap-phase0-2025-06-09.md, plan/vibeforge-phase1-workspace-and-filetree-2025-06-09.md.
+- Confirmed current product state via list_dir + read of key sources (App.tsx, App.css, FileTree.tsx, package.json, tauri.conf.json, Cargo.toml, capabilities/default.json, src-tauri/src/main.rs, spec/).
+- Current: Phase 0 shell + Phase 1 live FileTree (real @tauri-apps/plugin-fs, structured badges + quick-create that writes real .md + refresh) is complete and committed on the prior plan branch. Placeholder 2x2 terminal grid exists with explicit "(Phase 2: real PTY + xterm.js + layouts)" comments. No xterm or PTY crates/deps yet. Cargo clean per latest user note ("fix tauri-plugin-fs + capabilities").
+
+**Actions:**
+- Used todo_write to track the phase (plan creation, track append, git branch+commit, first impl step, verification).
+- Created the full Phase 2 plan file using the exact template and conventions from AGENT.md and all prior plans (Goal, tight Scope In/Out, numbered small-step Approach, Risks, Success Criteria, Skills Activated with security-review called out as CRITICAL for PTY, Artifacts, Dependencies).
+- The plan explicitly treats the UI design plan as non-negotiable for terminal chrome/accents/density/motion/anti-slop/keyboard.
+- Activated and referenced .vibeforge/skills: security-review (mandatory before any exec), rust-patterns, terminal-ops, frontend-patterns, make-interfaces-feel-better, verification-loop.
+- Appended this track entry.
+- (Next immediate) Correct git branch creation (prior attempt used bash && which fails in PowerShell), then commit the plan + track update on the new dedicated branch, push -u, record SHA.
+
+**Decisions:**
+- Scope kept deliberately tight: deliver real interactive PTY in the *existing* 2x2 grid + make the topbar agent buttons actually spawn/attach. Advanced layouts, full orchestration (vibeforge-agent CLI + stop stripping), rich context send, persistence = deferred (explicitly Out).
+- Security-first gate: no PTY spawn code considered complete until security-review skill is read and its checklist applied. Start with allow-listed agents + explicit shell only; no arbitrary command-line construction.
+- Windows priority (user env is Windows/PowerShell): default shell = powershell/cmd, conpty via chosen crate.
+- Frontend: xterm.js + fit (webgl/canvas decision in step 2). Keep changes minimal and isolated from the live FileTree + structured workflow surface.
+- Process: every meaningful slice (after plan) will produce a commit referencing the plan + track, plus track append. No code before plan file existed on disk + branch discipline.
+
+**Verification (so far):**
+- All mandatory read files loaded at session open.
+- Plan file created at plan/vibeforge-phase2-terminals-pty-2025-06-09.md with complete required sections.
+- This track entry added.
+- Working tree will reflect the new plan + track mod (untracked/modified until committed on new branch).
+- Current branch still the phase0 one until the next command succeeds; untracked files will carry cleanly to the new branch.
+
+**Impact:**
+- Phase 2 now has a self-contained, traceable artifact that any future session can load (alongside AGENT + track latest + master + UI design).
+- The "meta/setup" era is long over; we are now driving the actual product heart (real terminals) under the same strict rules that produced the clean Phase 0/1 foundation.
+- Security and design direction are called out explicitly so they cannot be skipped.
+
+**Next (immediate in this session):**
+- Execute correct PowerShell git checkout -b plan/vibeforge-phase2-terminals-pty-2025-06-09 (using ; separator).
+- git add + commit the plan creation + track update (message must reference plan file + track entry + conventional style).
+- git push -u origin <branch>.
+- Record the commit SHA here + in the plan post-work.
+- Mark phase2-plan + phase2-track-start + phase2-git-plan-commit todos complete.
+- Begin first small implementation step per the plan (likely Step 2: frontend xterm foundation with local echo stub + TerminalPane component, following FileTree.tsx patterns and design tokens).
+- After the step: verify build, manual tauri dev smoke, append short track note, commit.
+
+All strictly per Vibeforge AGENT.md (plan/spec/track + git discipline + security for PTY). The complete focused product continues to be built in small verifiable increments.
+
+**Git (will be updated post-command):**
+- Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09
+- First commit on this branch will be the plan + track creation.
