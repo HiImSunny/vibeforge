@@ -797,7 +797,15 @@ All strictly per AGENT.md. Small steps, security considered, design direction re
 - Regular push.
 
 **Git:**
-- Branch remains plan/vibeforge-phase2-terminals-pty-2025-06-09.
-- Will push the plan update + this track shortly, then code changes in follow-up commits.
+- Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09 (all work here).
+- First push for docs: 7929cce (plan evolution + this track start).
+- Code refactor + new orchestration sub-plan + final track update: next commit(s) + push (regular as requested).
 
-All per AGENT.md + security-review for PTY. Continuing to make the terminal heart actually usable at scale.
+**Next immediate (in this session):**
+- Complete the dynamic list + single focus implementation (core of "1").
+- Add keyboard, activity stub, FileTree send.
+- Create the orchestration foundation sub-plan (done — see plan/vibeforge-phase2-orchestration-foundation-2025-06-10.md).
+- Verify, commit + push, record SHAs.
+- Explain main branch (see response to user).
+
+All per AGENT.md.

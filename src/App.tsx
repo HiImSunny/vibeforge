@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import FileTree from "./components/FileTree";
 import TerminalPane from "./components/TerminalPane";
+import { invoke } from "@tauri-apps/api/core";
 
 /**
  * Vibeforge — Phase 0/1 shell + Phase 2 real PTY terminals
@@ -25,106 +26,117 @@ const AGENTS: Agent[] = [
   { id: "aider", label: "aider", accent: "general" },
 ];
 
-type TerminalSlot = {
-  id: number;
+type TerminalSession = {
+  ptyId: string;
   title: string;
   accent: string;
-  command: string | null; // passed to TerminalPane → create_terminal (validated in Rust)
-  restartKey: number;     // increment to force PTY kill + recreate for this slot id
 };
 
-const INITIAL_TITLES = ["1 • shell", "2 • shell", "3 • shell", "4 • shell"];
-const INITIAL_ACCENTS = ["general", "general", "general", "general"];
+let terminalCounter = 0;
+function generatePtyId(): string {
+  terminalCounter += 1;
+  return `t-${Date.now()}-${terminalCounter}`;
+}
 
 export default function VibeforgeShell() {
-  const [activePane, setActivePane] = useState(0);
   const [launched, setLaunched] = useState<string[]>([]);
   const [status, setStatus] = useState("2 projects • 0 running agents • structured workflow active");
 
-  // Phase 2: 4 fixed slots driven by state so we can retarget them with real agent commands.
-  const [slots, setSlots] = useState<TerminalSlot[]>(() =>
-    [0, 1, 2, 3].map((i) => ({
-      id: i,
-      title: INITIAL_TITLES[i],
-      accent: INITIAL_ACCENTS[i],
-      command: null, // default shell (powershell on Win via Rust)
-      restartKey: 0,
-    }))
-  );
+  // Dynamic list of terminals (unlimited). Only one is focused at a time.
+  const [terminals, setTerminals] = useState<TerminalSession[]>([]);
+  const [focusedPtyId, setFocusedPtyId] = useState<string | null>(null);
 
-  function launchAgent(agent: Agent) {
-    // Target preference: active pane if it is "general"/free, else first general slot, else active.
-    const isFree = (s: TerminalSlot) => !s.command || s.accent === "general";
-    let target = activePane;
-    if (!isFree(slots[activePane])) {
-      const freeIdx = slots.findIndex(isFree);
-      if (freeIdx !== -1) target = freeIdx;
+  // Helper to create a new terminal session (explicit create in Rust first).
+  async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
+    const ptyId = generatePtyId();
+    try {
+      await invoke("create_terminal", { id: ptyId, command });
+    } catch (e: any) {
+      console.error("create_terminal failed at App level", e);
+      setStatus(`Failed to create terminal: ${e}`);
+      return;
     }
 
-    setSlots((prev) =>
-      prev.map((s, idx) =>
-        idx === target
-          ? {
-              ...s,
-              title: `${agent.label} • live`,
-              accent: agent.accent,
-              command: agent.id, // e.g. "claude" — Rust allow-list will accept
-              restartKey: s.restartKey + 1,
-            }
-          : s
-      )
-    );
+    const newSession: TerminalSession = {
+      ptyId,
+      title: baseTitle,
+      accent,
+    };
+
+    setTerminals((prev) => [...prev, newSession]);
+    setFocusedPtyId(ptyId);
+    setStatus(`${baseTitle} ready`);
+  }
+
+  function launchAgent(agent: Agent) {
+    // Always create a fresh terminal for the agent (unlimited model).
+    const title = `${agent.label} • live`;
+    createNewTerminal(agent.id, title, agent.accent);
 
     if (!launched.includes(agent.id)) {
       const next = [...launched, agent.id];
       setLaunched(next);
-      setStatus(`${next.length} agents active • ${agent.label} spawned in pane ${target}`);
-    } else {
-      setStatus(`${launched.length} agents active • ${agent.label} re-spawned in pane ${target}`);
     }
   }
 
   function spawnNewTerminal() {
-    // Pick active or first slot; reset it to a fresh default shell PTY.
-    const target = activePane;
-    setSlots((prev) =>
-      prev.map((s, idx) =>
-        idx === target
-          ? {
-              ...s,
-              title: `${s.id + 1} • shell`,
-              accent: "general",
-              command: null,
-              restartKey: s.restartKey + 1,
-            }
-          : s
-      )
-    );
-    setStatus(`New shell PTY in pane ${target}`);
+    createNewTerminal(null, "shell", "general");
   }
 
-  function closePane(i: number) {
-    // Explicit close: kill the PTY for this slot (via restartKey) and reset to a clean default shell.
-    // This makes the ✕ button actually terminate the session (real kill_terminal call inside TerminalPane effect).
-    setSlots((prev) =>
-      prev.map((s, idx) =>
-        idx === i
-          ? {
-              ...s,
-              title: `${i + 1} • shell`,
-              accent: "general",
-              command: null,
-              restartKey: s.restartKey + 1,
-            }
-          : s
-      )
-    );
-    setStatus(`Closed pane ${i} (PTY killed, fresh shell ready)`);
+  function closeTerminal(ptyId: string) {
+    // Kill in Rust + remove from list.
+    invoke("kill_terminal", { id: ptyId }).catch(() => {});
+
+    setTerminals((prev) => {
+      const remaining = prev.filter((t) => t.ptyId !== ptyId);
+      // If we closed the focused one, focus the last remaining (or none).
+      if (focusedPtyId === ptyId) {
+        const nextFocused = remaining.length > 0 ? remaining[remaining.length - 1].ptyId : null;
+        setFocusedPtyId(nextFocused);
+      }
+      return remaining;
+    });
+    setStatus("Terminal closed");
   }
 
-  function selectPane(i: number) {
-    setActivePane(i);
+  function focusTerminal(ptyId: string) {
+    setFocusedPtyId(ptyId);
   }
+
+  // Minimal send context from FileTree into the currently focused terminal.
+  function sendToFocusedTerminal(text: string) {
+    if (!focusedPtyId) {
+      setStatus("No focused terminal to send to");
+      return;
+    }
+    invoke("write_to_terminal", { id: focusedPtyId, data: text + "\n" }).catch((e) => {
+      console.warn("send to focused failed", e);
+    });
+    setStatus(`Sent to ${focusedPtyId}`);
+  }
+
+  // Keyboard support for terminal list: ArrowUp/Down to cycle focus, 1-9 to jump.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (terminals.length === 0) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const idx = terminals.findIndex((t) => t.ptyId === focusedPtyId);
+        let nextIdx = idx;
+        if (e.key === "ArrowDown") nextIdx = (idx + 1) % terminals.length;
+        if (e.key === "ArrowUp") nextIdx = (idx - 1 + terminals.length) % terminals.length;
+        focusTerminal(terminals[nextIdx].ptyId);
+      }
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num) && num >= 1 && num <= 9 && num <= terminals.length) {
+        focusTerminal(terminals[num - 1].ptyId);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [terminals, focusedPtyId]);
+
+  const focusedSession = terminals.find((t) => t.ptyId === focusedPtyId) || null;
 
   return (
     <div className="vf-root">
@@ -170,7 +182,7 @@ export default function VibeforgeShell() {
           <div className="vf-sidebar-header" style={{ marginTop: 4 }}>STRUCTURED WORKFLOW + FILES (live)</div>
 
           <FileTree
-            onFileOpen={(p) => setStatus(`Opened (stub): ${p}`)}
+            onFileOpen={(p) => sendToFocusedTerminal(p)}
             onRefresh={() => setStatus("Tree refreshed • real disk")}
           />
 
@@ -181,42 +193,70 @@ export default function VibeforgeShell() {
           </div>
         </div>
 
-        {/* Center — terminal grid (the heart) */}
+        {/* Center — dynamic terminal list + single focused viewer (unlimited terminals) */}
         <div className="vf-center">
           <div className="vf-center-header">
             <span>TERMINALS</span>
-            <span style={{ color: "var(--vf-muted)" }}>• 2×2 grid • real PTY (xterm + portable-pty)</span>
+            <span style={{ color: "var(--vf-muted)" }}>• {terminals.length} open • focus one</span>
             <div style={{ flex: 1 }} />
             <button className="vf-btn" style={{ fontSize: 11, padding: "3px 8px" }} onClick={spawnNewTerminal}>
-              + New
+              + New Shell
             </button>
           </div>
 
-          <div className="vf-terminal-grid">
-            {slots.map((slot) => {
-              const i = slot.id;
-              return (
-                <div
-                  key={`${i}-${slot.restartKey}`} // stable per slot but remount outer on restart if needed
-                  className={`vf-pane ${activePane === i ? "active" : ""}`}
-                  onClick={() => selectPane(i)}
-                >
-                  <TerminalPane
-                    id={i}
-                    title={slot.title}
-                    accent={slot.accent}
-                    command={slot.command}
-                    restartKey={slot.restartKey}
-                    onData={() => {
-                      if (launched.length > 0) {
-                        setStatus(`${launched.length} agents • input to pane ${i}`);
-                      }
-                    }}
-                    onClose={() => closePane(i)}
-                  />
+          <div className="terminal-manager">
+            {/* Terminal list (left) */}
+            <div className="terminal-list">
+              {terminals.length === 0 && (
+                <div style={{ padding: 12, color: "var(--vf-muted)", fontSize: 11 }}>
+                  No terminals yet.<br />Use topbar agents or + New Shell.
                 </div>
-              );
-            })}
+              )}
+              {terminals.map((t) => {
+                const isFocused = t.ptyId === focusedPtyId;
+                return (
+                  <div
+                    key={t.ptyId}
+                    className={`terminal-list-item ${isFocused ? "focused" : ""}`}
+                    onClick={() => focusTerminal(t.ptyId)}
+                  >
+                    <span className={`vf-badge ${t.accent}`} style={{ fontSize: 9, marginRight: 6 }}>{t.accent}</span>
+                    <span className="terminal-title" style={{ fontFamily: "var(--vf-mono, monospace)" }}>{t.title}</span>
+                    <button
+                      className="terminal-close"
+                      onClick={(e) => { e.stopPropagation(); closeTerminal(t.ptyId); }}
+                      title="Close terminal (kill PTY)"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Focused viewer (right / main) */}
+            <div className="terminal-viewer">
+              {focusedSession ? (
+                <TerminalPane
+                  ptyId={focusedSession.ptyId}
+                  title={focusedSession.title}
+                  accent={focusedSession.accent}
+                  onData={() => {
+                    if (launched.length > 0) {
+                      setStatus(`input to ${focusedSession.title}`);
+                    }
+                  }}
+                  onClose={() => closeTerminal(focusedSession.ptyId)}
+                  onActivity={() => {
+                    // Could update a lastActivity timestamp here for subtle "live" indicator in list
+                  }}
+                />
+              ) : (
+                <div style={{ padding: 20, color: "var(--vf-muted)", fontSize: 12 }}>
+                  Select or create a terminal from the list on the left.
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
