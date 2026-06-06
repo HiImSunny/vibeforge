@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
+import { invoke } from "@tauri-apps/api/core";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import "@xterm/xterm/css/xterm.css";
 
 /**
@@ -68,36 +70,52 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
     term.open(containerRef.current);
     fitAddon.fit();
 
-    // Local echo for this slice (immediate feedback, no real PTY yet)
-    // When real PTY arrives, parent will pass onData that writes to Rust, and we will receive chunks via callback prop or event.
-    term.onData((data) => {
-      // Echo locally for now
-      term.write(data);
-
-      // Forward to parent (will become the real PTY write path)
-      onData?.(data);
-    });
-
-    // Focus visual is primarily driven by the outer .vf-pane.active class (from parent click).
-    // xterm shows its own cursor when it has keyboard focus. We call focus() on wrapper click.
-
-    // Initial prompt hint (stub)
-    term.write("\r\n$ vibeforge terminal (local echo — real PTY in next slice)\r\n> ");
-
     termRef.current = term;
     fitRef.current = fitAddon;
 
-    // Fit on window resize (Tauri webview or user drag)
+    const paneId = String(id);
+
+    // === Real PTY wiring ===
+    // Ask the Rust side (lib.rs) to spawn a real PTY for this pane.
+    // The background reader in Rust will emit "terminal-output" events.
+    invoke("create_terminal", { id: paneId, command: null }).catch((e: any) => {
+      console.error("create_terminal failed", e);
+      term.write(`\r\n[failed to create PTY: ${e}]\r\n`);
+    });
+
+    // Listen for output from our specific PTY and feed it to xterm.
+    let unlisten: UnlistenFn | undefined;
+    (async () => {
+      unlisten = await listen<{ id: string; data: string }>("terminal-output", (event) => {
+        const payload = event.payload;
+        if (payload.id === paneId && termRef.current) {
+          termRef.current.write(payload.data);
+        }
+      });
+    })();
+
+    // Keystrokes go to the real PTY. The PTY (shell or agent) is responsible for echo and output.
+    term.onData((data) => {
+      invoke("write_to_terminal", { id: paneId, data }).catch((e: any) => {
+        console.warn("write_to_terminal failed", e);
+      });
+      onData?.(data);
+    });
+
+    // Fit + optional PTY resize notification
     const handleResize = () => {
       try {
         fitAddon.fit();
+        const cols = term.cols;
+        const rows = term.rows;
+        invoke("resize_terminal", { id: paneId, cols, rows }).catch(() => {});
       } catch {
-        // ignore transient
+        // ignore
       }
     };
     window.addEventListener("resize", handleResize);
 
-    // Initial fit after mount
+    // Initial fit
     requestAnimationFrame(() => {
       try {
         fitAddon.fit();
@@ -106,13 +124,16 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      if (unlisten) unlisten();
+      // Kill the PTY on unmount (best effort)
+      invoke("kill_terminal", { id: paneId }).catch(() => {});
       try {
         term.dispose();
       } catch {}
       termRef.current = null;
       fitRef.current = null;
     };
-  }, [onData]);
+  }, [id, onData]);
 
   // Expose a way for parent to write output (used when real PTY streams chunks back)
   // For the stub slice we don't call it from outside yet.
