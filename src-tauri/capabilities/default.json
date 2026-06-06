@@ -7,8 +7,11 @@
     "core:default",
     "opener:default",
     "fs:default",
-    "fs:read-dir",
-    "fs:read-text-file",
-    "fs:write-text-file"
+    "fs:read-dirs",
+    "fs:read-files",
+    "fs:write-files",
+    "fs:allow-read-dir",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file"
   ]
 }

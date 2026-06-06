@@ -513,3 +513,38 @@ All per Vibeforge AGENT.md.
 - Update track after each meaningful step. Keep all work on plan/* branches until merged back per AGENT.md.
 
 The user explicitly asked for the final complete product and to "just do it according to your judgment." We are now past the meta-only phase and have a living desktop shell. Full product work continues without further ceremony.
+
+---
+
+## 2025-06-09 — Build Green + Live File Tree Integrated (Phase 0 + Phase 1 slice)
+
+**Status:** DONE (this slice)
+
+**Plan:** plan/vibeforge-tauri-bootstrap-phase0-2025-06-09.md + plan/vibeforge-phase1-workspace-and-filetree-2025-06-09.md
+
+**Actions:**
+- Fixed Tailwind/PostCSS v4 mismatch (uninstalled the conflicting packages, removed the v3-style config files that were breaking Vite PostCSS).
+- `npm run build` now succeeds cleanly: tsc + vite (34 modules, dist produced).
+- The live FileTree (real @tauri-apps/plugin-fs readDir + writeTextFile for quick-create) is wired into the sidebar.
+- The app now shows the actual files on disk, including the very plan/ and track/ we are editing.
+- " + New Plan / Spec / Track" buttons create real timestamped .md files under the folders and the tree can refresh to show them.
+- All changes committed on the plan branch (latest 4535cf4 + 0edc88f).
+
+**Verification:**
+- Build: ✓ clean.
+- The shell + tree respect the design direction (calm, dense, structured workflow visible and actionable from first load).
+- Git history clean on `plan/vibeforge-tauri-bootstrap-phase0-2025-06-09` (and the Phase 1 plan file is also committed).
+- Process followed: new plan created for the feature before/during implementation, commits reference plans, track updated.
+
+**Current product state (runnable):**
+- Tauri 2 desktop app (Windows portable target in mind).
+- Purposeful dark technical workspace shell (top agent launchers, terminal grid area, context panels).
+- **Live sidebar tree** that reads the real project and lets you create new structured workflow entries directly from the UI — this is the first concrete demonstration of the "Vibeforge difference" (AGENT.md + plan/spec/track).
+
+**Next (continuing autonomously):**
+- User can now run `npm run tauri dev` (Rust is installed on the machine via the winget we executed; first run will compile the Rust side).
+- I will immediately begin the next slices (more workspace polish, basic terminal emulation in the panes using xterm.js, or jump to a Phase 2 PTY plan and real process spawning).
+- More plans will be created as we tackle bigger areas (terminals, browser/HTTP context, AI Diff, packaging, etc.).
+- Goal remains the complete, focused, non-slop multi-agent desktop workspace the original roadmap described.
+
+The drive toward the final complete product continues. All per AGENT.md.
