@@ -337,6 +337,23 @@ button:active, .vf-btn:active {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: width 120ms ease;
+}
+
+/* Collapse support for focus mode (directly addresses "khó tập trung" feedback + matches design plan "collapsible panels") */
+.vf-right.collapsed {
+  width: 28px;
+  overflow: hidden;
+}
+
+.vf-right.collapsed .vf-panel-header {
+  padding: 4px 4px;
+  font-size: 9px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  justify-content: center;
+  gap: 4px;
+  min-height: 100%;
 }
 
 .vf-panel-header {

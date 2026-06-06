@@ -50,6 +50,7 @@ export default function VibeforgeShell() {
   const [lastTreeContext, setLastTreeContext] = useState<string | null>(null); // last path from FileTree for context injection into delegate
   const [delegateTargetId, setDelegateTargetId] = useState<string | null>(null); // explicit target choice for Quick Delegate (overrides focused if set)
   const [lastCaptured, setLastCaptured] = useState<string>(""); // last result from "Capture last + strip" (for review / copy)
+  const [rightCollapsed, setRightCollapsed] = useState(false); // collapse right context panel for terminal focus (per UI design plan)
 
   // Helper to create a new terminal session (explicit create in Rust first).
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
@@ -284,179 +285,199 @@ export default function VibeforgeShell() {
         </div>
 
         {/* Right panels — context tools (browser/http/diff stubs) */}
-        <div className="vf-right">
-          <div className="vf-panel-header">CONTEXT • SEND TO AGENT</div>
-
-          <div className="vf-context-item">
-            <div style={{ fontWeight: 500, marginBottom: 2 }}>Browser (stub)</div>
-            <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>localhost:1420 • 3 console msgs</div>
-            <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }}>
-              Send screenshot + console
-            </button>
+        <div className={`vf-right ${rightCollapsed ? 'collapsed' : ''}`}>
+          <div
+            className="vf-panel-header"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+            onClick={() => setRightCollapsed(!rightCollapsed)}
+            title={rightCollapsed ? "Expand context panel" : "Collapse context panel for terminal focus"}
+          >
+            <span>CONTEXT • SEND TO AGENT</span>
+            <span style={{ fontSize: 10, color: 'var(--vf-muted)' }}>
+              {rightCollapsed ? '◀' : '▶'}
+            </span>
           </div>
 
-          <div className="vf-context-item">
-            <div style={{ fontWeight: 500, marginBottom: 2 }}>HTTP (stub)</div>
-            <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>GET /api/agents 200 • 14ms</div>
-            <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }}>
-              Send last response
-            </button>
-          </div>
-
-          <div className="vf-context-item">
-            <div style={{ fontWeight: 500, marginBottom: 2 }}>AI Diff Review (Phase 4)</div>
-            <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>0 pending changes</div>
-            <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }} disabled>
-              Review changes
-            </button>
-          </div>
-
-          {/* Orchestration foundation: Quick Delegate strengthened (context from FileTree + explicit target) */}
-          <div className="vf-context-item" style={{ borderTop: "1px solid var(--vf-border)", paddingTop: 8 }}>
-            <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 11 }}>Quick Delegate (foundation)</div>
-
-            {/* Target selector: allow choosing any open terminal, not just focused */}
-            {terminals.length > 0 && (
-              <div style={{ marginBottom: 4 }}>
-                <div style={{ fontSize: 9, color: "var(--vf-muted)", marginBottom: 2 }}>Target terminal</div>
-                <select
-                  value={delegateTargetId || focusedPtyId || ""}
-                  onChange={(e) => setDelegateTargetId(e.target.value || null)}
-                  className="vf-input"
-                  style={{ width: "100%", fontSize: 10, padding: "2px 4px" }}
-                >
-                  {terminals.map((t) => (
-                    <option key={t.ptyId} value={t.ptyId}>
-                      {t.title} {t.ptyId === focusedPtyId ? "(focused)" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <textarea
-              value={delegatePrompt}
-              onChange={(e) => setDelegatePrompt(e.target.value)}
-              placeholder="Describe the task for the agent..."
-              style={{ width: "100%", minHeight: 48, fontSize: 11, background: "var(--vf-surface)", border: "1px solid var(--vf-border)", color: "var(--vf-text)", padding: 4, borderRadius: 3 }}
-            />
-
-            {/* Context injection from FileTree (last clicked file/dir) */}
-            {lastTreeContext && (
-              <button
-                className="vf-btn"
-                style={{ fontSize: 9, padding: "1px 4px", marginTop: 3 }}
-                onClick={() => {
-                  const ctx = `\n\n[context from tree]\n${lastTreeContext}`;
-                  setDelegatePrompt((p) => (p.trim() ? p + ctx : ctx.trim()));
-                }}
-              >
-                Insert tree context: {lastTreeContext.length > 28 ? "..." + lastTreeContext.slice(-25) : lastTreeContext}
-              </button>
-            )}
-
-            <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
-              <button
-                className="vf-btn"
-                style={{ fontSize: 10, padding: "2px 6px", flex: 1 }}
-                disabled={!(delegateTargetId || focusedPtyId) || !delegatePrompt.trim()}
-                onClick={async () => {
-                  const target = delegateTargetId || focusedPtyId;
-                  if (!target) return;
-                  const taskMsg = `Task:\n${delegatePrompt.trim()}\n\nPlease complete this task. Use any provided context.`;
-                  try {
-                    await invoke("write_to_terminal", { id: target, data: taskMsg + "\n" });
-                    setStatus(`Task sent to ${target}`);
-                    setDelegatePrompt("");
-                    setLastCaptured(""); // clear previous capture when sending new work
-                  } catch (e: any) {
-                    setStatus(`Delegate failed: ${e}`);
-                  }
-                }}
-              >
-                Send task to target
-              </button>
-              <button
-                className="vf-btn"
-                style={{ fontSize: 10, padding: "2px 6px" }}
-                onClick={async () => {
-                  // Demo the improved strip (multi-line + expanded phrases)
-                  const sample = "Here is my analysis of the bug...\n\nSome thinking...\nClaude Code has stopped";
-                  try {
-                    const cleaned: string = await invoke("strip_claude_stop_messages", { output: sample });
-                    setStatus(`Strip demo: ${cleaned}`);
-                  } catch (e: any) {
-                    setStatus(`Strip failed: ${e}`);
-                  }
-                }}
-              >
-                Demo strip
-              </button>
-              <button
-                className="vf-btn"
-                style={{ fontSize: 10, padding: "2px 6px" }}
-                disabled={!(delegateTargetId || focusedPtyId)}
-                onClick={async () => {
-                  const target = delegateTargetId || focusedPtyId;
-                  if (!target) return;
-                  try {
-                    const raw: string = await invoke("get_terminal_output", { id: target });
-                    const cleaned: string = await invoke("strip_claude_stop_messages", { output: raw });
-                    setLastCaptured(cleaned);
-                    setStatus(`Captured ${raw.length} chars → stripped to ${cleaned.length} (from ${target})`);
-                  } catch (e: any) {
-                    setStatus(`Capture failed: ${e}`);
-                  }
-                }}
-              >
-                Capture last + strip
-              </button>
-            </div>
-
-            {/* Small result area for the last captured+stripped output (foundation for review / re-use) */}
-            {lastCaptured && (
-              <div style={{ marginTop: 6 }}>
-                <div style={{ fontSize: 9, color: "var(--vf-muted)", marginBottom: 2 }}>
-                  Last captured + stripped:
-                </div>
-                <textarea
-                  readOnly
-                  value={lastCaptured}
-                  style={{
-                    width: "100%",
-                    minHeight: 52,
-                    fontSize: 9,
-                    background: "var(--vf-surface)",
-                    border: "1px solid var(--vf-border)",
-                    color: "var(--vf-text)",
-                    padding: 4,
-                    borderRadius: 3,
-                    fontFamily: "var(--vf-mono, monospace)",
-                  }}
-                />
-                <button
-                  className="vf-btn"
-                  style={{ fontSize: 9, padding: "1px 4px", marginTop: 2 }}
-                  onClick={() => {
-                    navigator.clipboard?.writeText(lastCaptured).catch(() => {});
-                    setStatus("Copied captured output to clipboard");
-                  }}
-                >
-                  Copy
+          {!rightCollapsed && (
+            <>
+              <div className="vf-context-item">
+                <div style={{ fontWeight: 500, marginBottom: 2 }}>Browser (stub)</div>
+                <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>localhost:1420 • 3 console msgs</div>
+                <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }}>
+                  Send screenshot + console
                 </button>
               </div>
-            )}
 
-            <div style={{ fontSize: 9, color: "var(--vf-muted)", marginTop: 2 }}>
-              Choose target • insert tree context • Capture last output then strip. All via existing PTY surface.
-            </div>
-          </div>
+              <div className="vf-context-item">
+                <div style={{ fontWeight: 500, marginBottom: 2 }}>HTTP (stub)</div>
+                <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>GET /api/agents 200 • 14ms</div>
+                <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }}>
+                  Send last response
+                </button>
+              </div>
 
-          <div style={{ flex: 1 }} />
+              <div className="vf-context-item">
+                <div style={{ fontWeight: 500, marginBottom: 2 }}>AI Diff Review (Phase 4)</div>
+                <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>0 pending changes</div>
+                <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }} disabled>
+                  Review changes
+                </button>
+              </div>
 
-          <div style={{ padding: 10, fontSize: 10, color: "var(--vf-muted)", borderTop: "1px solid var(--vf-border)" }}>
-            Drag files / terminal output / browser here to send context (future). Orchestration foundation active.
-          </div>
+              {/* Orchestration foundation: Quick Delegate strengthened (context from FileTree + explicit target) */}
+              <div className="vf-context-item" style={{ borderTop: "1px solid var(--vf-border)", paddingTop: 8 }}>
+                <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 11 }}>Quick Delegate (foundation)</div>
+
+                {/* Target selector: allow choosing any open terminal, not just focused */}
+                {terminals.length > 0 && (
+                  <div style={{ marginBottom: 4 }}>
+                    <div style={{ fontSize: 9, color: "var(--vf-muted)", marginBottom: 2 }}>Target terminal</div>
+                    <select
+                      value={delegateTargetId || focusedPtyId || ""}
+                      onChange={(e) => setDelegateTargetId(e.target.value || null)}
+                      className="vf-input"
+                      style={{ width: "100%", fontSize: 10, padding: "2px 4px" }}
+                    >
+                      {terminals.map((t) => (
+                        <option key={t.ptyId} value={t.ptyId}>
+                          {t.title} {t.ptyId === focusedPtyId ? "(focused)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <textarea
+                  value={delegatePrompt}
+                  onChange={(e) => setDelegatePrompt(e.target.value)}
+                  placeholder="Describe the task for the agent..."
+                  style={{ width: "100%", minHeight: 48, fontSize: 11, background: "var(--vf-surface)", border: "1px solid var(--vf-border)", color: "var(--vf-text)", padding: 4, borderRadius: 3 }}
+                />
+
+                {/* Context injection from FileTree (last clicked file/dir) */}
+                {lastTreeContext && (
+                  <button
+                    className="vf-btn"
+                    style={{ fontSize: 9, padding: "1px 4px", marginTop: 3 }}
+                    onClick={() => {
+                      const ctx = `\n\n[context from tree]\n${lastTreeContext}`;
+                      setDelegatePrompt((p) => (p.trim() ? p + ctx : ctx.trim()));
+                    }}
+                  >
+                    Insert tree context: {lastTreeContext.length > 28 ? "..." + lastTreeContext.slice(-25) : lastTreeContext}
+                  </button>
+                )}
+
+                <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
+                  <button
+                    className="vf-btn"
+                    style={{ fontSize: 10, padding: "2px 6px", flex: 1 }}
+                    disabled={!(delegateTargetId || focusedPtyId) || !delegatePrompt.trim()}
+                    onClick={async () => {
+                      const target = delegateTargetId || focusedPtyId;
+                      if (!target) return;
+                      const taskMsg = `Task:\n${delegatePrompt.trim()}\n\nPlease complete this task. Use any provided context.`;
+                      try {
+                        await invoke("write_to_terminal", { id: target, data: taskMsg + "\n" });
+                        setStatus(`Task sent to ${target}`);
+                        setDelegatePrompt("");
+                        setLastCaptured(""); // clear previous capture when sending new work
+                      } catch (e: any) {
+                        setStatus(`Delegate failed: ${e}`);
+                      }
+                    }}
+                  >
+                    Send task to target
+                  </button>
+                  <button
+                    className="vf-btn"
+                    style={{ fontSize: 10, padding: "2px 6px" }}
+                    onClick={async () => {
+                      // Demo the improved strip using realistic multi-line output (with trailing garbage after stop message).
+                      // This matches real Claude Code sessions.
+                      const sample = `Đây là phân tích lỗi...
+   Tôi đã kiểm tra file A và B.
+   Kết luận: cần sửa logic X.
+
+   Claude Code has stopped
+   Một số dòng rác sau này không được xuất hiện`;
+                      try {
+                        const cleaned: string = await invoke("strip_claude_stop_messages", { output: sample });
+                        setStatus(`Strip demo: ${cleaned}`);
+                      } catch (e: any) {
+                        setStatus(`Strip failed: ${e}`);
+                      }
+                    }}
+                  >
+                    Demo strip
+                  </button>
+                  <button
+                    className="vf-btn"
+                    style={{ fontSize: 10, padding: "2px 6px" }}
+                    disabled={!(delegateTargetId || focusedPtyId)}
+                    onClick={async () => {
+                      const target = delegateTargetId || focusedPtyId;
+                      if (!target) return;
+                      try {
+                        const raw: string = await invoke("get_terminal_output", { id: target });
+                        const cleaned: string = await invoke("strip_claude_stop_messages", { output: raw });
+                        setLastCaptured(cleaned);
+                        setStatus(`Captured ${raw.length} chars → stripped to ${cleaned.length} (from ${target})`);
+                      } catch (e: any) {
+                        setStatus(`Capture failed: ${e}`);
+                      }
+                    }}
+                  >
+                    Capture last + strip
+                  </button>
+                </div>
+
+                {/* Small result area for the last captured+stripped output (foundation for review / re-use) */}
+                {lastCaptured && (
+                  <div style={{ marginTop: 6 }}>
+                    <div style={{ fontSize: 9, color: "var(--vf-muted)", marginBottom: 2 }}>
+                      Last captured + stripped:
+                    </div>
+                    <textarea
+                      readOnly
+                      value={lastCaptured}
+                      style={{
+                        width: "100%",
+                        minHeight: 52,
+                        fontSize: 9,
+                        background: "var(--vf-surface)",
+                        border: "1px solid var(--vf-border)",
+                        color: "var(--vf-text)",
+                        padding: 4,
+                        borderRadius: 3,
+                        fontFamily: "var(--vf-mono, monospace)",
+                      }}
+                    />
+                    <button
+                      className="vf-btn"
+                      style={{ fontSize: 9, padding: "1px 4px", marginTop: 2 }}
+                      onClick={() => {
+                        navigator.clipboard?.writeText(lastCaptured).catch(() => {});
+                        setStatus("Copied captured output to clipboard");
+                      }}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ fontSize: 9, color: "var(--vf-muted)", marginTop: 2 }}>
+                  Choose target • insert tree context • Capture last output then strip. All via existing PTY surface.
+                </div>
+              </div>
+
+              <div style={{ flex: 1 }} />
+
+              <div style={{ padding: 10, fontSize: 10, color: "var(--vf-muted)", borderTop: "1px solid var(--vf-border)" }}>
+                Drag files / terminal output / browser here to send context (future). Orchestration foundation active.
+              </div>
+            </>
+          )}
         </div>
       </div>
 

@@ -985,4 +985,73 @@ All per AGENT.md + sub-plan + Phase 2 main plan. Tree clean at end.
 - Push succeeded (771a658..7a4434e).
 - SHA recorded. Message references sub-plan + main Phase 2 plan + track.
 
+**Verification run (2025-06-10):**
+- Non-interactive checks executed: `npm run build` ✓ clean, `cargo check` ✓ (cargo test has no meaningful unit tests yet — this feature is integration/PTY driven).
+- Confirmed code is present (grep for get_terminal_output / Capture last + strip / output_buffers / lastCaptured).
+- Real testing must be manual via `npm run tauri dev` (see user guidance in conversation).
+- Builds and code structure verified before handing off manual test steps.
+
+**Windows spawn fix (codex and similar agents):**
+- Root cause: "codex" (and gemini/aider) often resolve on Windows to npm shims in `%APPDATA%\npm\codex` (no .exe extension). `CommandBuilder::new("codex")` led to CreateProcessW on a non-PE file → os error 193 "%1 is not a valid Win32 application".
+- The quoted path + \0 in the error was internal diagnostic from portable-pty's CreateProcess wrapper + C string handling.
+- Fix: For the script-heavy agent names on Windows, wrap via `cmd.exe /c <name>`. This lets PATHEXT + the shim mechanism work while staying inside the allow-list (still only controlled commands).
+- "claude" and shells continue to use direct spawn (they are usually real executables).
+- `cargo check` ✓ after change.
+- This was blocking topbar agent buttons on the user's machine (npm global installs).
+
 All strictly per AGENT.md (reads first, track entry before code, small steps, security for orchestration/PTY output, regular push).
+
+---
+## 2025-06-10 — UI/UX feedback: Current layout hard to focus + feels too plain/simple (per user testing)
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/vibeforge-phase2-terminals-pty-2025-06-09.md (Evolved Approach section + "Additional polish requested") + plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md (**MUST follow** — collapsible panels, calm technical density, first viewport = real tools, every element earns its place, no slop) + plan/vibeforge-phase2-orchestration-foundation-2025-06-10.md
+
+**Actions (mandatory):**
+- Re-read all 6 mandated files (AGENT.md full, recent track, both Phase 2 plans, master roadmap, full UI design plan).
+- Confirmed on correct branch.
+- Appended this entry immediately before any code changes.
+- (Next) todo_write + inspect current layout code (App.tsx + App.css + TerminalPane + FileTree).
+
+**User feedback (direct):**
+- "UI hiện tại nó không tốt cho UX và khó tập trung quá, với nhìn đơn giản nữa"
+- Issues observed in the evolved layout (dynamic list + single focused viewer + always-visible right panel with Quick Delegate + stubs):
+  - Hard to concentrate ("khó tập trung") — multiple panels (list + viewer + right context) compete for attention.
+  - Feels too plain/basic ("nhìn đơn giản") despite design tokens — lacks premium, intentional "vibe coding" polish.
+  - Right panel (CONTEXT • SEND TO AGENT with many stub items + Quick Delegate + capture result) adds persistent visual weight even when user wants to focus on terminal.
+  - Terminal list in center splits the main area, reducing immersion of the focused viewer.
+
+**Decisions (must align with UI design plan):**
+- Right/bottom panels must be collapsible (explicitly called out in design plan).
+- Terminal area should feel first-class and focused.
+- Keep high-density, calm technical, purposeful (no slop, every control earns place).
+- Improve visual hierarchy and focus states for the main viewer.
+- Small, iterative changes only (no full layout rewrite yet).
+- Reference design plan + make-interfaces-feel-better principles in every change.
+- Continue using the dynamic list + single viewer model (user-requested evolution).
+
+**Verification targets:**
+- After changes: user can easily collapse right panel for terminal focus mode.
+- Main viewer feels more prominent/immersive.
+- UI still dense + scannable but calmer when focused.
+- No regression in terminal list, keyboard nav, Quick Delegate, capture.
+- Builds clean, manual tauri dev test, commit + push referencing plans + this track entry.
+- Update this entry + relevant plan post-work with results.
+
+**Progress this step (small verifiable):**
+- Added `rightCollapsed` state + clickable header toggle (▶/◀) on the right panel.
+- Content (stubs + Quick Delegate + capture result) is hidden when collapsed; only the thin header remains.
+- CSS: `.vf-right.collapsed { width: 28px }` + vertical header treatment for nice collapsed state. Width transition for calm feel.
+- Clicking header or chevron toggles. Viewer automatically gets the extra horizontal space (flex layout).
+- This is the highest-leverage change for "khó tập trung" complaint and directly implements the "collapsible panels" requirement from the UI design plan.
+- `npm run build` will be verified (simple change).
+
+**Next small steps (still in this track entry):**
+- Improve terminal viewer prominence (stronger chrome, focus treatment on .terminal-viewer / .vf-pane when active).
+- Compact the right panel content when expanded (fewer stub items or make Quick Delegate the star).
+- More polish (concentric radius, better visual weight, reduce "đơn giản" plain feel) per make-interfaces-feel-better.
+
+**Git:** Will commit this focused UX improvement referencing the UI design plan + Phase 2 plan.
+
+All per AGENT.md + strict adherence to the UI design plan (the non-negotiable source of truth for frontend).
