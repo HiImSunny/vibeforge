@@ -103,6 +103,25 @@ export default function VibeforgeShell() {
     setStatus(`New shell PTY in pane ${target}`);
   }
 
+  function closePane(i: number) {
+    // Explicit close: kill the PTY for this slot (via restartKey) and reset to a clean default shell.
+    // This makes the ✕ button actually terminate the session (real kill_terminal call inside TerminalPane effect).
+    setSlots((prev) =>
+      prev.map((s, idx) =>
+        idx === i
+          ? {
+              ...s,
+              title: `${i + 1} • shell`,
+              accent: "general",
+              command: null,
+              restartKey: s.restartKey + 1,
+            }
+          : s
+      )
+    );
+    setStatus(`Closed pane ${i} (PTY killed, fresh shell ready)`);
+  }
+
   function selectPane(i: number) {
     setActivePane(i);
   }
@@ -193,7 +212,7 @@ export default function VibeforgeShell() {
                         setStatus(`${launched.length} agents • input to pane ${i}`);
                       }
                     }}
-                    onClose={() => setStatus(`Closed pane ${i}`)}
+                    onClose={() => closePane(i)}
                   />
                 </div>
               );
@@ -241,7 +260,7 @@ export default function VibeforgeShell() {
       <div className="vf-statusbar">
         <span>{status}</span>
         <span className="vf-badge">plan/spec/track</span>
-        <span style={{ marginLeft: "auto", fontSize: 10 }}>Windows • portable build target • Phase 0 shell</span>
+        <span style={{ marginLeft: "auto", fontSize: 10 }}>Windows • portable • real PTY (Phase 2)</span>
       </div>
     </div>
   );

@@ -86,7 +86,9 @@ export default function TerminalPane({ id, title, accent = "general", command, r
     // Only allow-listed program names (powershell.exe, claude, aider, ...) or default shell.
     invoke("create_terminal", { id: paneId, command: spawnCommand }).catch((e: any) => {
       console.error("create_terminal failed", e);
-      term.write(`\r\n[failed to create PTY: ${e}]\r\n`);
+      // Better error state: visible, colored, actionable message inside the terminal.
+      term.write(`\r\n\x1b[31m[PTY spawn failed: ${e}]\x1b[0m\r\n`);
+      term.write(`\r\nYou can:\r\n  • Click ✕ then + New (or an agent button) to try again\r\n  • Ensure the agent CLI (claude, aider, ...) is in PATH if launching one\r\n`);
     });
 
     // Listen for output from our specific PTY and feed it to xterm.

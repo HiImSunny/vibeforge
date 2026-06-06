@@ -716,3 +716,47 @@ All strictly following AGENT.md.
 - SHAs recorded here + in plan post-work. All per mandatory Git Discipline.
 
 All per AGENT.md + Phase 2 plan + security-review skill. The heart (real terminals + agent launch) continues to solidify in traceable increments.
+
+---
+
+## 2025-06-09 — Phase 2 follow-up: functional ✕ close + error UX polish (small slice)
+
+**Status:** DONE (this micro-slice)
+
+**Plan:** plan/vibeforge-phase2-terminals-pty-2025-06-09.md (continuing the same plan)
+
+**Actions:**
+- Confirmed latest state (re-read track/plan/code + git; tree clean on correct branch).
+- Made the ✕ button in every TerminalPane header *actually do something real*:
+  - Added `closePane(i)` in App that resets the slot (title → shell, accent → general, command → null, ++restartKey).
+  - This triggers the pane's effect cleanup (kill_terminal) + immediate re-create with default shell.
+  - onClose prop now calls the real closer instead of only setStatus.
+  - Matches the plan note "Optional: kill on explicit close button" and improves "cleanup".
+- Small error state improvement: on create_terminal failure, the pane now writes a clearer, multi-line, colored message with actionable advice (use ✕ +New / agent buttons, check PATH).
+- Polish: updated statusbar from "Phase 0 shell" to "real PTY (Phase 2)" for accuracy (no behavior change).
+- All still using the restartKey + command mechanism we built in the prior slice (no new PTY manager changes needed).
+
+**Verification:**
+- cargo check: ✓ (clean).
+- npm run build: ✓ (clean, 39 modules).
+- Behavior (when user runs tauri dev): 
+  - ✕ on any pane now kills its current PTY and immediately gives you a fresh default shell in the same grid cell.
+  - Failed spawns (e.g. "claude" not in PATH) show helpful text inside the xterm instead of a single ugly line.
+  - Agent launches and +New continue to work as before.
+  - No leaks: every close/re-target does explicit kill.
+
+**Impact:**
+- The terminal grid now has complete basic lifecycle for its 4 slots: launch agent (real), +New (real), explicit close (real kill + reset), resize (improved).
+- Error handling is a bit more user-friendly without adding UI chrome.
+- Keeps the "fixed 4 grid" contract of the original shell; everything is still purposeful and calm.
+
+**Git:**
+- Will commit + push immediately after this track note (message references plan + track).
+- New SHAs to be recorded here post-push.
+
+**Next (from plan):**
+- More polish if desired (keyboard navigation between panes, subtle activity, better initial cols/rows handshake, or send-context from tree).
+- Or move to lightweight orchestration foundation (new narrow sub-plan or continue on this one).
+- When comfortable, mark the Phase 2 plan as substantially delivered for the terminal core and update master roadmap tracking.
+
+All strictly per AGENT.md. Small steps, security considered, design direction respected.

@@ -178,8 +178,9 @@ This plan ensures Phase 2 starts with the same discipline that got us a clean, p
   - cargo check (after Rust + warning fix): ✓ Finished dev profile, no errors.
   - npm run build: ✓ (tsc clean, vite 39 modules, dist produced).
   - Manual expectation: `npm run tauri dev` shows 4 real default PTYs; topbar clicks now replace targeted pane's PTY with agent command (error message if binary absent, which is acceptable + matches plan risk note).
-- Recent commits on branch (pre this push): 008a644 (Rust PTY + wiring), ... (see git log). This continuation will add one more referencing the plan + track.
-- Status when closed (after final commit/push in session): Core terminals + agent button functionality delivered. Plan remains IN_PROGRESS or marked with clear next (orchestration sub-slice) per master roadmap.
+- Recent commits on branch: 008a644 (Rust core), 893a958 (agent buttons + resize), record chores, then 6fbf6bd + follow-up for close buttons + error polish.
+- This micro-slice (close button wiring + error UX): added functional ✕ that kills PTY + resets to fresh shell via the restartKey mechanism; clearer failure messages in-pane; statusbar accuracy.
+- Status when closed (after final commit/push in session): Core terminals + agent button functionality + basic lifecycle (launch / +New / close) delivered in the existing 2x2 grid. Plan can be considered substantially complete for the "Terminals & real PTY" heart; orchestration or further polish can be next slice or separate narrow plan per master roadmap.
 - Notes for next session: load AGENT.md + latest track/vibeforge-progress.md + this plan + UI design plan + master roadmap. Stay on plan/vibeforge-phase2-terminals-pty-2025-06-09. Update track + commit after every meaningful slice.
 
 All work follows Vibeforge AGENT.md. We are building the real product, not meta. Security and the "calm technical purposeful" design direction are enforced at every step.
