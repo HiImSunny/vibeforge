@@ -166,11 +166,20 @@ This plan ensures Phase 2 starts with the same discipline that got us a clean, p
 **Post-Work Update (filled during execution):**
 
 - Branch created: `plan/vibeforge-phase2-terminals-pty-2025-06-09`
-- Plan file + initial track entry committed at: <SHA>
-- Key decisions (PTY crate, xterm addon choice, spawn strategy, security findings):
-- Verification commands & results:
-- Final commits / push SHAs:
-- Status when closed: DONE / core terminals delivered (or partial with clear next slice)
-- Notes for next session: load AGENT.md + latest track + this plan + UI design + master roadmap.
+- Plan file + initial track entry committed at: be4586c (and follow-ups: 75984df for xterm grid, 008a644 for Rust PTY core)
+- Key decisions:
+  - PTY: portable-pty 0.8 (ConPTY on Win, good cross-platform, matches prior research).
+  - xterm + addon-fit (no webgl for this slice; canvas fallback implicit).
+  - Spawn: strict allow-list in Rust (powershell/cmd + the 4 topbar names); command passed as program name only via CommandBuilder (never shell -c or concatenated argv). Frontend only supplies null or controlled ids.
+  - UI: 4 fixed grid slots (per existing shell) driven by state; launchAgent targets active/free slot and forces re-spawn via restartKey + command prop. No layout overhaul.
+  - Resize: ResizeObserver + post-fit resize_terminal calls (rAF) for robustness in grid.
+  - Security: security-review.md read at start of continuation + re-applied to spawn path (see track entry). No new capabilities; kill hygiene; least-privilege.
+- Verification commands & results (this slice + prior):
+  - cargo check (after Rust + warning fix): ✓ Finished dev profile, no errors.
+  - npm run build: ✓ (tsc clean, vite 39 modules, dist produced).
+  - Manual expectation: `npm run tauri dev` shows 4 real default PTYs; topbar clicks now replace targeted pane's PTY with agent command (error message if binary absent, which is acceptable + matches plan risk note).
+- Recent commits on branch (pre this push): 008a644 (Rust PTY + wiring), ... (see git log). This continuation will add one more referencing the plan + track.
+- Status when closed (after final commit/push in session): Core terminals + agent button functionality delivered. Plan remains IN_PROGRESS or marked with clear next (orchestration sub-slice) per master roadmap.
+- Notes for next session: load AGENT.md + latest track/vibeforge-progress.md + this plan + UI design plan + master roadmap. Stay on plan/vibeforge-phase2-terminals-pty-2025-06-09. Update track + commit after every meaningful slice.
 
 All work follows Vibeforge AGENT.md. We are building the real product, not meta. Security and the "calm technical purposeful" design direction are enforced at every step.

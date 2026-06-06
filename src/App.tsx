@@ -4,10 +4,12 @@ import FileTree from "./components/FileTree";
 import TerminalPane from "./components/TerminalPane";
 
 /**
- * Vibeforge — Phase 0 shell + Phase 1 live file tree
+ * Vibeforge — Phase 0/1 shell + Phase 2 real PTY terminals
  *
- * Now with real disk-backed tree (Phase 1) that prioritizes plan/spec/track/AGENT.md
- * and supports quick-create that writes actual files.
+ * 2x2 grid of real xterm + portable-pty terminals.
+ * Topbar agent buttons (claude/codex/gemini/aider) now spawn real PTYs with the matching command (allow-listed in Rust).
+ * + New opens default shell PTY.
+ * Follows UI design (calm technical, agent accent borders, dense purposeful, no slop) + AGENT.md.
  */
 
 interface Agent {
@@ -23,26 +25,87 @@ const AGENTS: Agent[] = [
   { id: "aider", label: "aider", accent: "general" },
 ];
 
+type TerminalSlot = {
+  id: number;
+  title: string;
+  accent: string;
+  command: string | null; // passed to TerminalPane → create_terminal (validated in Rust)
+  restartKey: number;     // increment to force PTY kill + recreate for this slot id
+};
+
+const INITIAL_TITLES = ["1 • shell", "2 • shell", "3 • shell", "4 • shell"];
+const INITIAL_ACCENTS = ["general", "general", "general", "general"];
+
 export default function VibeforgeShell() {
   const [activePane, setActivePane] = useState(0);
   const [launched, setLaunched] = useState<string[]>([]);
   const [status, setStatus] = useState("2 projects • 0 running agents • structured workflow active");
 
+  // Phase 2: 4 fixed slots driven by state so we can retarget them with real agent commands.
+  const [slots, setSlots] = useState<TerminalSlot[]>(() =>
+    [0, 1, 2, 3].map((i) => ({
+      id: i,
+      title: INITIAL_TITLES[i],
+      accent: INITIAL_ACCENTS[i],
+      command: null, // default shell (powershell on Win via Rust)
+      restartKey: 0,
+    }))
+  );
+
   function launchAgent(agent: Agent) {
-    if (!launched.includes(agent.id)) {
-      setLaunched([...launched, agent.id]);
-      setStatus(`${launched.length + 1} agents active • ${agent.label} thinking...`);
-      // In real app this would send context + spawn PTY
+    // Target preference: active pane if it is "general"/free, else first general slot, else active.
+    const isFree = (s: TerminalSlot) => !s.command || s.accent === "general";
+    let target = activePane;
+    if (!isFree(slots[activePane])) {
+      const freeIdx = slots.findIndex(isFree);
+      if (freeIdx !== -1) target = freeIdx;
     }
+
+    setSlots((prev) =>
+      prev.map((s, idx) =>
+        idx === target
+          ? {
+              ...s,
+              title: `${agent.label} • live`,
+              accent: agent.accent,
+              command: agent.id, // e.g. "claude" — Rust allow-list will accept
+              restartKey: s.restartKey + 1,
+            }
+          : s
+      )
+    );
+
+    if (!launched.includes(agent.id)) {
+      const next = [...launched, agent.id];
+      setLaunched(next);
+      setStatus(`${next.length} agents active • ${agent.label} spawned in pane ${target}`);
+    } else {
+      setStatus(`${launched.length} agents active • ${agent.label} re-spawned in pane ${target}`);
+    }
+  }
+
+  function spawnNewTerminal() {
+    // Pick active or first slot; reset it to a fresh default shell PTY.
+    const target = activePane;
+    setSlots((prev) =>
+      prev.map((s, idx) =>
+        idx === target
+          ? {
+              ...s,
+              title: `${s.id + 1} • shell`,
+              accent: "general",
+              command: null,
+              restartKey: s.restartKey + 1,
+            }
+          : s
+      )
+    );
+    setStatus(`New shell PTY in pane ${target}`);
   }
 
   function selectPane(i: number) {
     setActivePane(i);
   }
-
-  // Phase 2: real xterm-backed panes (local echo stub for this slice; real PTY + Rust manager next).
-  // Titles and accents match the topbar launchers. onData forwards (currently echo only).
-  const terminalSlots = [0, 1, 2, 3];
 
   return (
     <div className="vf-root">
@@ -103,40 +166,34 @@ export default function VibeforgeShell() {
         <div className="vf-center">
           <div className="vf-center-header">
             <span>TERMINALS</span>
-            <span style={{ color: "var(--vf-muted)" }}>• grid • 4 slots • (Phase 2: real PTY + xterm.js + layouts)</span>
+            <span style={{ color: "var(--vf-muted)" }}>• 2×2 grid • real PTY (xterm + portable-pty)</span>
             <div style={{ flex: 1 }} />
-            <button className="vf-btn" style={{ fontSize: 11, padding: "3px 8px" }} onClick={() => setStatus("New terminal (stub) — will open PTY")}>
+            <button className="vf-btn" style={{ fontSize: 11, padding: "3px 8px" }} onClick={spawnNewTerminal}>
               + New
             </button>
           </div>
 
           <div className="vf-terminal-grid">
-            {terminalSlots.map((i) => {
-              const titles = [
-                "1 • claude-3.5-sonnet • idle",
-                "2 • (shell)",
-                "3 • (empty)",
-                "4 • (empty)",
-              ];
-              const accents = ["claude", "general", "general", "general"];
+            {slots.map((slot) => {
+              const i = slot.id;
               return (
                 <div
-                  key={i}
+                  key={`${i}-${slot.restartKey}`} // stable per slot but remount outer on restart if needed
                   className={`vf-pane ${activePane === i ? "active" : ""}`}
                   onClick={() => selectPane(i)}
                 >
                   <TerminalPane
                     id={i}
-                    title={titles[i] || `${i} • (stub)`}
-                    accent={accents[i] || "general"}
+                    title={slot.title}
+                    accent={slot.accent}
+                    command={slot.command}
+                    restartKey={slot.restartKey}
                     onData={() => {
-                      // Stub: in next slice this will invoke Tauri command to write to real PTY.
-                      // For now the component does local echo; we just surface activity.
-                      if (i === 0 && launched.length > 0) {
-                        setStatus(`${launched.length} agents • input sent to pane ${i}`);
+                      if (launched.length > 0) {
+                        setStatus(`${launched.length} agents • input to pane ${i}`);
                       }
                     }}
-                    onClose={() => setStatus(`Closed pane ${i} (stub — real PTY kill later)`)}
+                    onClose={() => setStatus(`Closed pane ${i}`)}
                   />
                 </div>
               );

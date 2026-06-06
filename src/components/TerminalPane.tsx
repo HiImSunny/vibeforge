@@ -6,27 +6,32 @@ import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import "@xterm/xterm/css/xterm.css";
 
 /**
- * TerminalPane — Phase 2 foundation (stub PTY / local echo first)
+ * TerminalPane — Phase 2 real PTY-backed terminal (xterm + portable-pty)
  *
- * - Real xterm.js instance (v6) + FitAddon.
- * - Themed to Vibeforge calm technical palette (CSS vars + explicit).
- * - onData callback for parent to forward to real PTY write (Phase 2 later).
- * - Local echo for immediate interactivity in this slice (until real Rust PTY wired).
- * - Follows FileTree.tsx patterns: clean hooks, no slop, documented.
- * - Polish per make-interfaces-feel-better + UI design plan (hit areas, mono, calm).
+ * - Real xterm.js (v6) + FitAddon.
+ * - Themed to Vibeforge calm technical palette.
+ * - On mount (or command/restartKey change): creates a real PTY via Tauri (default powershell or explicit allowed command).
+ * - Bidirectional: onData → write_to_terminal; "terminal-output" events → term.write (PTY provides echo).
+ * - Resize: fit + resize_terminal on window and container size changes.
+ * - Cleanup: unlisten + kill_terminal + dispose on unmount or re-spawn.
+ * - Follows FileTree patterns + UI design (calm, dense, agent accents, purposeful, hit areas).
  *
- * Next (subsequent slice on this plan): replace local echo with real Tauri invoke + event stream from Rust PTY manager.
+ * Security: only controlled commands (see Rust allow-list in lib.rs). Never arbitrary user strings as program.
  */
 
 interface TerminalPaneProps {
   id: number | string;
   title?: string;
   accent?: string; // "claude" | "codex" | "gemini" | "general"
+  /** Optional explicit command to spawn (must be in Rust allow-list: powershell.exe, claude, aider, etc.). null/undefined = default shell. */
+  command?: string | null;
+  /** Bump this to force kill + re-create the PTY for the same id (used by parent when launching agents into existing slots). */
+  restartKey?: number;
   onData?: (data: string) => void;
   onClose?: () => void;
 }
 
-export default function TerminalPane({ id, title, accent = "general", onData, onClose }: TerminalPaneProps) {
+export default function TerminalPane({ id, title, accent = "general", command, restartKey, onData, onClose }: TerminalPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const termRef = useRef<Terminal | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
@@ -74,11 +79,12 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
     fitRef.current = fitAddon;
 
     const paneId = String(id);
+    const spawnCommand = command ?? null;
 
     // === Real PTY wiring ===
-    // Ask the Rust side (lib.rs) to spawn a real PTY for this pane.
-    // The background reader in Rust will emit "terminal-output" events.
-    invoke("create_terminal", { id: paneId, command: null }).catch((e: any) => {
+    // Spawn (or re-spawn) a controlled PTY. command is validated against allow-list in Rust (lib.rs).
+    // Only allow-listed program names (powershell.exe, claude, aider, ...) or default shell.
+    invoke("create_terminal", { id: paneId, command: spawnCommand }).catch((e: any) => {
       console.error("create_terminal failed", e);
       term.write(`\r\n[failed to create PTY: ${e}]\r\n`);
     });
@@ -102,30 +108,48 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
       onData?.(data);
     });
 
-    // Fit + optional PTY resize notification
-    const handleResize = () => {
+    // Reliable fit + resize to PTY. Call after fit so cols/rows are up-to-date.
+    const fitAndResize = () => {
       try {
         fitAddon.fit();
-        const cols = term.cols;
-        const rows = term.rows;
-        invoke("resize_terminal", { id: paneId, cols, rows }).catch(() => {});
+        if (termRef.current) {
+          const cols = termRef.current.cols;
+          const rows = termRef.current.rows;
+          invoke("resize_terminal", { id: paneId, cols, rows }).catch(() => {});
+        }
       } catch {
-        // ignore
+        // ignore transient fit/resize races
       }
     };
-    window.addEventListener("resize", handleResize);
 
-    // Initial fit
+    // Global window resize (covers app window changes)
+    const handleWindowResize = () => {
+      // rAF to let layout settle
+      requestAnimationFrame(fitAndResize);
+    };
+    window.addEventListener("resize", handleWindowResize);
+
+    // Per-pane container resize (grid pane size changes, splits later, etc.)
+    let ro: ResizeObserver | null = null;
+    if (containerRef.current && typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => {
+        requestAnimationFrame(fitAndResize);
+      });
+      ro.observe(containerRef.current);
+    }
+
+    // Initial fit + first resize notification (after xterm has painted)
     requestAnimationFrame(() => {
-      try {
-        fitAddon.fit();
-      } catch {}
+      fitAndResize();
     });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleWindowResize);
+      if (ro) {
+        try { ro.disconnect(); } catch {}
+      }
       if (unlisten) unlisten();
-      // Kill the PTY on unmount (best effort)
+      // Kill the PTY on unmount or before re-spawn (best effort)
       invoke("kill_terminal", { id: paneId }).catch(() => {});
       try {
         term.dispose();
@@ -133,7 +157,7 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
       termRef.current = null;
       fitRef.current = null;
     };
-  }, [id, onData]);
+  }, [id, onData, command, restartKey]);
 
   // Expose a way for parent to write output (used when real PTY streams chunks back)
   // For the stub slice we don't call it from outside yet.
@@ -154,7 +178,7 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
     <div className="vf-pane" data-pane-id={id}>
       <div className="vf-pane-header">
         <span className="label" style={{ fontFamily: "var(--vf-mono, ui-monospace, monospace)" }}>
-          {title || `${id} • (stub)`}
+          {title || `${id} • shell`}
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {accentClass && <span className={`vf-badge ${accentClass}`} style={{ fontSize: 9 }}>{accent}</span>}
@@ -162,7 +186,7 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
             className="vf-btn"
             style={{ fontSize: 10, padding: "1px 6px", minHeight: 20, minWidth: 20, border: "none", background: "transparent" }}
             onClick={handleClose}
-            title="Close terminal (stub — real kill in PTY slice)"
+            title="Close terminal (kills PTY)"
           >
             ✕
           </button>

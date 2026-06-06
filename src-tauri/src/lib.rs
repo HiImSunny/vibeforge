@@ -52,7 +52,7 @@ fn create_terminal(
     // Choose a safe default shell.
     // On Windows we prefer powershell for a modern experience.
     // Later we can make this configurable or detect $env:COMSPEC.
-    let mut cmd = if let Some(c) = command {
+    let cmd = if let Some(c) = command {
         // Only allow a very small allow-list for now (defense in depth).
         // In a real product this list would come from a user-editable registry
         // with validation.

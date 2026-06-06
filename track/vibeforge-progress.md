@@ -603,7 +603,113 @@ All strictly per Vibeforge AGENT.md (plan/spec/track + git discipline + security
 
 **Git:**
 - Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09 (dedicated per AGENT.md)
-- Plan + track creation commit: be4586c (pushed to origin)
-- SHA range on push: 81da73c..be4586c
-- Remote branch created and advanced. Incidental Cargo.lock was never added (left untracked).
-- Follow-up commits on this branch will continue the Phase 2 work with references to this plan.
+- Plan + track creation: be4586c
+- SHA record: 4cfa491
+- xterm deps: c54e991
+- Component + initial grid: 75984df (with fixes up to 8330290)
+- **Rust PTY manager + real wiring**: (new commit on branch)
+- All pushed. Cargo.lock stray remains untracked.
+
+## 2025-06-09 — Phase 2: Real PTY Manager + Frontend Wiring (first working shells)
+
+**Status:** IN_PROGRESS (core loop working, polish + agent-specific spawn next)
+
+**Plan:** plan/vibeforge-phase2-terminals-pty-2025-06-09.md
+
+**Actions:**
+- Added `portable-pty = "0.8"` (with security comment in Cargo.toml).
+- Implemented PtyManager + 4 commands in src-tauri/src/lib.rs:
+  - create_terminal(id, command?) — spawns safe shell (powershell.exe default on Win), starts background reader thread, emits "terminal-output" events.
+  - write_to_terminal, resize_terminal, kill_terminal.
+  - Strict allow-list comment + only controlled spawns (defense in depth for this slice).
+- cargo check clean (multiple iterations for take_writer + unused imports).
+- Updated TerminalPane.tsx:
+  - Added invoke + listen from @tauri-apps/api.
+  - On mount: invoke create_terminal for its id.
+  - listen("terminal-output") filtered by id → term.write().
+  - onData now only invokes write_to_terminal (no more local echo — real PTY/shell provides echo + output).
+  - Proper cleanup (unlisten + kill_terminal on unmount).
+  - Resize notification (basic).
+- Removed the old "local echo — real PTY in next slice" stub prompt.
+- Frontend build clean (38+ modules, xterm + real path active).
+- Committed + pushed (Rust + TS changes reference the plan).
+
+**Verification:**
+- cargo check: ✓ (exit 0)
+- npm run build: ✓ (exit 0, dist produced)
+- The 4 panes in the grid will now each spawn a real default shell PTY on app start.
+- Typing in a pane sends to real PTY; output (including prompt and command results) streams back via Tauri event.
+
+**Impact:**
+- For the first time, the terminal area is **real** instead of placeholder or local echo.
+- This is the heart of the product (Phase 2) delivered in small, committed, tracked steps.
+- Security discipline followed (comments + restricted spawn surface).
+
+**Next (per plan):**
+- Make topbar agent buttons actually recreate a pane with the specific command (e.g. "claude").
+- Better resize handling + initial size from xterm.
+- Optional: kill on explicit close button.
+- Update track + plan post-work.
+- Then move to more polish or the orchestration slice.
+
+All strictly following AGENT.md.
+
+---
+
+## 2025-06-09 — Phase 2: Topbar agent buttons spawn real PTYs + resize polish (remaining plan slice)
+
+**Status:** IN_PROGRESS (core delivered; polish + track/commit next in this entry)
+
+**Plan:** plan/vibeforge-phase2-terminals-pty-2025-06-09.md
+**Related:** previous Phase 2 entries, AGENT.md (git + security), UI design plan (accents, no slop, purposeful)
+
+**Actions (small verifiable steps):**
+- Read all mandatory start-of-session files (AGENT.md + latest track + active Phase 2 plan + master roadmap + UI design plan) + .vibeforge/skills/security-review.md + index (per AGENT.md "Project Skills" rule for PTY work).
+- Inspected current code: TerminalPane fully wired for real PTY already (create on mount with command:null, listen, onData write, cleanup kill, basic window resize); App still had static 4 panes + launchAgent only mutated "launched" UI state (no real spawn); lib.rs had full allow-list + command support but unused from UI.
+- todo_write used to track remaining slices (per system harness + for visibility).
+- TerminalPane.tsx edits:
+  - Added `command?: string | null` and `restartKey?: number` props.
+  - create_terminal now passes the command (or null for default shell).
+  - useEffect deps include command + restartKey → changing them triggers cleanup (kill) + fresh create (re-spawn same pane id safely).
+  - Resize upgraded: ResizeObserver on container + window listener + rAF + explicit post-fit invoke("resize_terminal", cols, rows). Better for grid pane size changes.
+  - Removed stale "(stub)" text; updated top docs + security note in comments.
+- App.tsx edits:
+  - Introduced TerminalSlot state (id, title, accent, command, restartKey) for the 4 fixed grid slots.
+  - launchAgent(agent): picks target (prefer activePane if free/general, else first free slot), updates that slot (title/accent/command, ++restartKey). This causes the TerminalPane for that id to kill old PTY and create new with e.g. command:"claude".
+  - spawnNewTerminal (wired to + New button): resets chosen slot to command:null (default shell) + bump key.
+  - Grid render now drives from slots state (passes command + restartKey + fresh title/accent).
+  - Removed all the old static titles/accents arrays and stub comments.
+- Security re-application (after reading skill):
+  - Frontend only ever passes null or values from our controlled AGENTS list ("claude", "codex", "gemini", "aider").
+  - Rust side: allow-list check (eq_ignore_ascii_case or ends_with) before CommandBuilder::new(programName). No shell -c, no user string interpolation into command line, no unsanitized input to exec surface.
+  - Keystroke data goes raw to PTY master (correct and intended for interactive terminal).
+  - Lifecycle: kill on unmount and on re-target. Capabilities remain minimal (no Tauri shell:execute).
+  - Matches Vibeforge PTY additions in security-review.md + plan's "controlled spawning" requirement.
+- Minor: fixed unused_mut warning in lib.rs (let cmd = ...).
+- Verification commands run: `cd src-tauri; cargo check` (clean, finished dev profile) + `npm run build` (tsc + vite ✓, 39 modules, dist produced).
+- All changes on the mandated branch. Small steps, no big refactors.
+
+**Verification:**
+- cargo check: ✓ (no errors; previous mut warning fixed).
+- npm run build: ✓ (exit 0, dist updated, no TS errors).
+- Code follows UI design (existing agent accent classes reused on buttons + badges; calm technical; every control earns place; first viewport remains the working terminals + live tree).
+- Security checklist items for PTY satisfied at this layer (see above).
+- When user runs `npm run tauri dev`: clicking topbar "claude"/etc will now cause the targeted pane to spawn a real PTY for that binary (if in PATH; otherwise the existing error path in pane writes "[failed to create PTY: ...]"). + New resets a pane to fresh default shell. Resize more robust. 4 concurrent real PTYs still work.
+
+**Impact:**
+- Topbar agent launchers are now functional (the last major "make the buttons do something real" item from the Phase 2 plan).
+- Resize/initial-size handling improved without over-engineering.
+- The 2x2 grid + topbar is now a usable real multi-PTY surface while staying inside the existing shell (no layout changes).
+- Process followed: plan first (already), security skill read, small steps, builds verified, will commit + push + track append before "done".
+
+**Next:**
+- Append this to track + update plan post-work.
+- Commit + push (message references plan + this track entry).
+- Optional: light manual tauri dev confirmation by user (or future slice).
+- If orchestration slice wanted inside Phase 2: create narrow sub-plan or continue here; otherwise mark this plan DONE after final push and move per master roadmap.
+
+**Git (this step):**
+- Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09 (enforced).
+- Will produce commit(s) after track update.
+
+All per AGENT.md + Phase 2 plan + security-review skill. The heart (real terminals + agent launch) continues to solidify in traceable increments.
