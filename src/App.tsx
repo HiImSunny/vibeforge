@@ -30,6 +30,7 @@ type TerminalSession = {
   ptyId: string;
   title: string;
   accent: string;
+  hasRecentActivity?: boolean; // for subtle indicator in list when not focused
 };
 
 let terminalCounter = 0;
@@ -61,6 +62,7 @@ export default function VibeforgeShell() {
       ptyId,
       title: baseTitle,
       accent,
+      hasRecentActivity: false,
     };
 
     setTerminals((prev) => [...prev, newSession]);
@@ -101,6 +103,10 @@ export default function VibeforgeShell() {
 
   function focusTerminal(ptyId: string) {
     setFocusedPtyId(ptyId);
+    // Clear activity flag when focusing (user has "seen" it)
+    setTerminals(prev =>
+      prev.map(t => t.ptyId === ptyId ? { ...t, hasRecentActivity: false } : t)
+    );
   }
 
   // Minimal send context from FileTree into the currently focused terminal.
@@ -205,11 +211,12 @@ export default function VibeforgeShell() {
           </div>
 
           <div className="terminal-manager">
-            {/* Terminal list (left) */}
+            {/* Terminal list (left) - polished */}
             <div className="terminal-list">
               {terminals.length === 0 && (
-                <div style={{ padding: 12, color: "var(--vf-muted)", fontSize: 11 }}>
-                  No terminals yet.<br />Use topbar agents or + New Shell.
+                <div className="empty-hint" style={{ padding: "10px 8px", fontSize: 10, color: "var(--vf-muted)", lineHeight: 1.35 }}>
+                  No terminals open.<br />
+                  Click an agent above or use + New Shell.
                 </div>
               )}
               {terminals.map((t) => {
@@ -219,8 +226,12 @@ export default function VibeforgeShell() {
                     key={t.ptyId}
                     className={`terminal-list-item ${isFocused ? "focused" : ""}`}
                     onClick={() => focusTerminal(t.ptyId)}
+                    title={t.title}
                   >
                     <span className={`vf-badge ${t.accent}`} style={{ fontSize: 9, marginRight: 6 }}>{t.accent}</span>
+                    {t.hasRecentActivity && !isFocused && (
+                      <span className="activity-dot" title="New output" />
+                    )}
                     <span className="terminal-title" style={{ fontFamily: "var(--vf-mono, monospace)" }}>{t.title}</span>
                     <button
                       className="terminal-close"
@@ -247,8 +258,13 @@ export default function VibeforgeShell() {
                     }
                   }}
                   onClose={() => closeTerminal(focusedSession.ptyId)}
-                  onActivity={() => {
-                    // Could update a lastActivity timestamp here for subtle "live" indicator in list
+                  onActivity={(id) => {
+                    // Mark activity on the session (for list indicator). If it's the focused one, no need.
+                    if (id !== focusedPtyId) {
+                      setTerminals(prev =>
+                        prev.map(t => t.ptyId === id ? { ...t, hasRecentActivity: true } : t)
+                      );
+                    }
                   }}
                 />
               ) : (

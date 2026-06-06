@@ -801,12 +801,19 @@ All strictly per AGENT.md. Small steps, security considered, design direction re
 - Docs push: 7929cce.
 - Major refactor + orchestration sub-plan + track: 066126d (pushed).
 - Record push SHA in track (this small follow-up commit).
+- Polish list slice: next commit + push.
 
-**Next immediate (in this session):**
-- Complete the dynamic list + single focus implementation (core of "1").
-- Add keyboard, activity stub, FileTree send.
-- Create the orchestration foundation sub-plan (done — see plan/vibeforge-phase2-orchestration-foundation-2025-06-10.md).
-- Verify, commit + push, record SHAs.
-- Explain main branch (see response to user).
+**Polish list follow-up (this slice):**
+- Enhanced .terminal-list / .terminal-list-item: better density (min-height 30px hit areas), hover states using surface tokens, stronger focused treatment (background + left bar), improved truncation/alignment.
+- Added subtle activity indicators: `hasRecentActivity` flag + green `.activity-dot` (with purposeful one-shot pop animation) on non-focused items when they receive output (wired via onActivity).
+- When focusing an item with activity, the flag clears.
+- Nicer empty state in list with actionable hint.
+- Close button hit area expanded + hover treatment.
+- All follows calm technical + make-interfaces-feel-better (no slop, purposeful motion only, scannable, agent badges remain prominent).
+- Build clean. The list now feels intentional and usable at scale (5-10+ terminals).
 
-All per AGENT.md.
+**Git for polish:**
+- Will commit + push immediately (regular push).
+- SHA to be recorded.
+
+All per AGENT.md. The terminal list is now polished and ready.
