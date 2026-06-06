@@ -1045,7 +1045,9 @@ All strictly per AGENT.md (reads first, track entry before code, small steps, se
 - CSS: `.vf-right.collapsed { width: 28px }` + vertical header treatment for nice collapsed state. Width transition for calm feel.
 - Clicking header or chevron toggles. Viewer automatically gets the extra horizontal space (flex layout).
 - This is the highest-leverage change for "khó tập trung" complaint and directly implements the "collapsible panels" requirement from the UI design plan.
-- `npm run build` will be verified (simple change).
+- Adapted visuals and component structure (topbar pills with colored bottom accents, stub buttons with icons, Quick Delegate labels/layout, terminal viewer header with "Active" badge, result area) to match the provided Stitch HTML mock more closely.
+- Updated design system in App.css: blended tokens (surface-container-*, outline, spacing xs/gutter/hit-area, label/body/code font stacks from Stitch Tailwind config) while preserving the calm technical palette and anti-slop principles from the project UI design plan.
+- `npm run build` ✓ clean. Real functionality (PTY, capture+strip, delegate with target/context, FileTree) fully preserved.
 
 **Next small steps (still in this track entry):**
 - Improve terminal viewer prominence (stronger chrome, focus treatment on .terminal-viewer / .vf-pane when active).

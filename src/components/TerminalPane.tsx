@@ -146,21 +146,19 @@ export default function TerminalPane({ ptyId, title, accent = "general", onData,
 
   return (
     <div className="vf-pane" data-pty-id={ptyId}>
-      <div className="vf-pane-header">
-        <span className="label" style={{ fontFamily: "var(--vf-mono, ui-monospace, monospace)" }}>
-          {title || `${ptyId} • shell`}
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {accentClass && <span className={`vf-badge ${accentClass}`} style={{ fontSize: 9 }}>{accent}</span>}
-          <button
-            className="vf-btn"
-            style={{ fontSize: 10, padding: "1px 6px", minHeight: 20, minWidth: 20, border: "none", background: "transparent" }}
-            onClick={handleClose}
-            title="Close terminal (kills PTY)"
-          >
-            ✕
-          </button>
-        </div>
+      {/* Viewer Header — closer to Stitch mock (Active badge + name) */}
+      <div className="h-6 shrink-0 border-b-grid flex items-center px-md bg-surface-container gap-sm">
+        <span className="px-xs bg-primary-container text-on-primary-container text-[10px] rounded border-grid uppercase font-bold tracking-wider">Active</span>
+        <span className="font-label-md text-label-md text-on-surface">{title || `${ptyId} • shell`}</span>
+        {accentClass && <span className={`vf-badge ${accentClass}`} style={{ fontSize: 9, marginLeft: 'auto' }}>{accent}</span>}
+        <button
+          className="vf-btn"
+          style={{ fontSize: 10, padding: "1px 6px", minHeight: 20, minWidth: 20, border: "none", background: "transparent", marginLeft: 4 }}
+          onClick={handleClose}
+          title="Close terminal (kills PTY)"
+        >
+          ✕
+        </button>
       </div>
 
       <div

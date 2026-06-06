@@ -300,33 +300,24 @@ export default function VibeforgeShell() {
 
           {!rightCollapsed && (
             <>
-              <div className="vf-context-item">
-                <div style={{ fontWeight: 500, marginBottom: 2 }}>Browser (stub)</div>
-                <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>localhost:1420 • 3 console msgs</div>
-                <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }}>
-                  Send screenshot + console
-                </button>
-              </div>
+              <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
+                <span className="flex items-center gap-xs"><span className="material-symbols-outlined text-[14px]">language</span> Browser Stub</span>
+                <span className="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+              </button>
 
-              <div className="vf-context-item">
-                <div style={{ fontWeight: 500, marginBottom: 2 }}>HTTP (stub)</div>
-                <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>GET /api/agents 200 • 14ms</div>
-                <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }}>
-                  Send last response
-                </button>
-              </div>
+              <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
+                <span className="flex items-center gap-xs"><span className="material-symbols-outlined text-[14px]">api</span> HTTP Stub</span>
+                <span className="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+              </button>
 
-              <div className="vf-context-item">
-                <div style={{ fontWeight: 500, marginBottom: 2 }}>AI Diff Review (Phase 4)</div>
-                <div style={{ fontSize: 11, color: "var(--vf-muted)" }}>0 pending changes</div>
-                <button className="vf-btn" style={{ marginTop: 6, fontSize: 11, padding: "4px 8px" }} disabled>
-                  Review changes
-                </button>
-              </div>
+              <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
+                <span className="flex items-center gap-xs"><span className="material-symbols-outlined text-[14px]">difference</span> AI Diff Review</span>
+                <span className="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+              </button>
 
-              {/* Orchestration foundation: Quick Delegate strengthened (context from FileTree + explicit target) */}
+              {/* Quick Delegate — styled closer to Stitch mock for better polish and UX */}
               <div className="vf-context-item" style={{ borderTop: "1px solid var(--vf-border)", paddingTop: 8 }}>
-                <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 11 }}>Quick Delegate (foundation)</div>
+                <div className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold mb-xs">Quick Delegate</div>
 
                 {/* Target selector: allow choosing any open terminal, not just focused */}
                 {terminals.length > 0 && (

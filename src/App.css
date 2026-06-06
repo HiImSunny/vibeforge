@@ -1,30 +1,58 @@
-/* Vibeforge — calm technical workspace shell (Phase 0 bootstrap)
-   Follows: frontend-design-direction + make-interfaces-feel-better
-   - Dark technical palette, high density, purposeful
-   - Concentric radius, optical alignment, real separation via subtle borders/shadows
-   - First viewport = actual tool surface (no hero, no marketing)
-   - Agent accents subtle, not decorative blobs
+/* Vibeforge — calm technical workspace (adapted from design system + Stitch polish)
+   Follows: frontend-design-direction + make-interfaces-feel-better + plan UI tokens
+   - Dark technical MD3-inspired palette (calm, high density, purposeful)
+   - No generic SaaS slop: first viewport = real tools, every element earns place
+   - Agent accents, good hit areas (36px+), concentric radius, optical alignment
+   - Dense but scannable, terminal-first
 */
 
-/* Design tokens + all .vf- layout styles (self-contained, no external Tailwind needed for Phase 0/1 shell) */
-
 :root {
+  /* Core dark technical palette (blended from project + Stitch config) */
   --vf-bg: #0a0c10;
   --vf-surface: #111318;
   --vf-surface-2: #161a20;
+  --vf-surface-container: #1e2024;
+  --vf-surface-container-low: #1a1c20;
+  --vf-surface-container-high: #282a2e;
+  --vf-surface-container-highest: #333539;
   --vf-border: #1f242c;
-  --vf-text: #e6e8eb;
+  --vf-text: #e2e2e8;
   --vf-muted: #8a919d;
-  --vf-accent-claude: #3b82f6;
-  --vf-accent-codex: #a855f7;
-  --vf-accent-gemini: #22c55e;
+  --vf-outline: #8c909f;
+  --vf-outline-variant: #424754;
+
+  /* Agent accents (primary/secondary/tertiary inspired) */
+  --vf-accent-claude: #adc6ff;      /* primary blue-ish */
+  --vf-accent-codex: #ddb7ff;       /* secondary purple */
+  --vf-accent-gemini: #4ae176;      /* tertiary green */
+  --vf-on-primary: #002e6a;
+  --vf-primary-container: #4d8eff;
+
   --vf-radius-sm: 4px;
   --vf-radius: 6px;
   --vf-radius-lg: 10px;
+
+  /* Spacing from design plan + Stitch (hit-area 36px, dense) */
+  --vf-xs: 2px;
+  --vf-sm: 8px;
+  --vf-md: 12px;
+  --vf-lg: 20px;
+  --vf-gutter: 1px;
+  --vf-hit-area: 36px;
+
+  /* Typography (Inter + JetBrains Mono) */
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 13px;
   line-height: 1.4;
 }
+
+/* Font stacks for labels/code (matching Stitch config) */
+.font-label-sm { font-family: "JetBrains Mono", monospace; font-size: 11px; line-height: 14px; font-weight: 400; }
+.font-label-md { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 16px; font-weight: 500; }
+.font-body-sm { font-family: Inter, system-ui, sans-serif; font-size: 12px; line-height: 18px; font-weight: 400; }
+.font-body-md { font-family: Inter, system-ui, sans-serif; font-size: 13px; line-height: 20px; font-weight: 400; }
+.font-headline-sm { font-family: Inter, system-ui, sans-serif; font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.font-code-block { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.6; font-weight: 400; }
 
 body {
   background: var(--vf-bg);
@@ -97,6 +125,7 @@ button:active, .vf-btn:active {
   margin-right: 12px;
 }
 
+/* Agent pills — adapted from Stitch for better visual weight and active feel */
 .vf-agent-btn {
   font-size: 11px;
   padding: 4px 10px;
@@ -104,10 +133,23 @@ button:active, .vf-btn:active {
   border: 1px solid var(--vf-border);
   background: transparent;
   color: var(--vf-muted);
+  transition: all 120ms ease;
+  position: relative;
 }
-.vf-agent-btn.claude { border-color: color-mix(in srgb, var(--vf-accent-claude) 40%, var(--vf-border)); color: #9ec1ff; }
-.vf-agent-btn.codex { border-color: color-mix(in srgb, var(--vf-accent-codex) 40%, var(--vf-border)); color: #d0a6ff; }
-.vf-agent-btn.gemini { border-color: color-mix(in srgb, var(--vf-accent-gemini) 40%, var(--vf-border)); color: #7be38f; }
+.vf-agent-btn.claude { border-color: color-mix(in srgb, var(--vf-accent-claude) 50%, var(--vf-border)); color: var(--vf-accent-claude); }
+.vf-agent-btn.codex { border-color: color-mix(in srgb, var(--vf-accent-codex) 50%, var(--vf-border)); color: var(--vf-accent-codex); }
+.vf-agent-btn.gemini { border-color: color-mix(in srgb, var(--vf-accent-gemini) 50%, var(--vf-border)); color: var(--vf-accent-gemini); }
+
+/* Colored bottom accent like Stitch pills (subtle active/brand feel) */
+.vf-agent-btn.claude { border-bottom-color: var(--vf-accent-claude); border-bottom-width: 2px; }
+.vf-agent-btn.codex { border-bottom-color: var(--vf-accent-codex); border-bottom-width: 2px; }
+.vf-agent-btn.gemini { border-bottom-color: var(--vf-accent-gemini); border-bottom-width: 2px; }
+
+.vf-agent-btn:hover {
+  background: var(--vf-surface-container);
+  border-color: var(--vf-outline-variant);
+  color: var(--vf-text);
+}
 
 .vf-main {
   flex: 1;
