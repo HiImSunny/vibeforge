@@ -28,7 +28,6 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
   const containerRef = useRef<HTMLDivElement | null>(null);
   const termRef = useRef<Terminal | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
-  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -131,7 +130,7 @@ export default function TerminalPane({ id, title, accent = "general", onData, on
   const accentClass = accent === "claude" ? "claude" : accent === "codex" ? "codex" : accent === "gemini" ? "gemini" : "";
 
   return (
-    <div className={`vf-pane ${isFocused ? "active" : ""}`} data-pane-id={id}>
+    <div className="vf-pane" data-pane-id={id}>
       <div className="vf-pane-header">
         <span className="label" style={{ fontFamily: "var(--vf-mono, ui-monospace, monospace)" }}>
           {title || `${id} • (stub)`}
