@@ -868,3 +868,58 @@ All per AGENT.md. The terminal list is now polished and ready.
 - Will commit + push regularly.
 
 All strictly per AGENT.md, sub-plan, and security for execution surfaces. Moving from terminal polish to the orchestration half of Phase 2.
+
+---
+## 2025-06-10 — Orchestration Foundation continuation (this session): Expand strip + strengthen Quick Delegate (context from FileTree + target choice) + start capture output prep
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/vibeforge-phase2-orchestration-foundation-2025-06-10.md (active sub-plan) + plan/vibeforge-phase2-terminals-pty-2025-06-09.md (main Phase 2 with Evolved Approach)
+
+**Related (read at session start per AGENT.md):** AGENT.md (full), track/vibeforge-progress.md (entries 2025-06-09+), plan/vibeforge-main-implementation-roadmap-2025-06-07.md, plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md
+
+**Actions (immediate):**
+- Mandatory full reads of the 6 specified files completed at session open.
+- Confirmed on correct branch `plan/vibeforge-phase2-terminals-pty-2025-06-09`, working tree clean, recent commits match (d347d19 orchestration start, 059cefc record).
+- Appended this IN_PROGRESS entry **immediately** (before any code) per strict AGENT.md rule.
+- (Next) todo_write to track session priorities; then small verifiable implementation steps only.
+
+**This session focus (per sub-plan priorities + user guidance):**
+1. Expand `strip_claude_stop_messages` (more phrases, robust multi-line handling, keep marker).
+2. Strengthen Quick Delegate in right panel: support injecting context from FileTree (current path or selected), allow choosing target terminal (dropdown or list) instead of only focused.
+3. Begin output capture mechanism (Tauri surface or hook) so strip can be applied post-agent-run in future.
+4. Light exploration / decision notes on CLI surface vs in-app (document only; no big impl yet).
+5. Add verification with real Claude stop output examples + manual test in tauri dev.
+- Every meaningful micro-step: build check, manual smoke, append short track note, commit + push referencing both plans + this entry. Security mindset (controlled paths only).
+
+**Decisions / notes to capture:**
+- Keep using dynamic terminal list + focused PTY (visible delegation surface for foundation).
+- Strip remains pure transform (no mutate live stream yet).
+- UI stays calm technical, dense, follows UI design plan (no slop).
+
+**Verification targets (this session):**
+- cargo check + npm run build clean after changes.
+- Can launch agent terminal, use improved Quick Delegate (with context + target), see formatted send + strip demo works better.
+- Real Claude stop phrases tested.
+- Track updated + commits pushed regularly on the plan branch.
+- No violation of AGENT.md (no code before this entry; git discipline followed).
+
+**Git:** All work strictly on `plan/vibeforge-phase2-terminals-pty-2025-06-09`. Regular push after slices. Reference sub-plan + main Phase 2 plan in messages. Main remote intentionally unchanged (correct per AGENT.md Git Discipline).
+
+All per Vibeforge AGENT.md (plan/spec/track + git + security for PTY/orchestration). Building real product in small, traceable increments.
+
+**Progress this slice (2025-06-10 continuation - after entry appended):**
+- Expanded `strip_claude_stop_messages` (Rust): line-aware truncate for multi-line output, added realistic phrases (Claude Code has stopped., Task completed, etc.), kept marker + security comment. `cargo check` clean (2.3s).
+- Strengthened Quick Delegate (App.tsx): 
+  - New `lastTreeContext` + `delegateTargetId` state.
+  - FileTree `onFileOpen` now also sets last context (existing direct-to-focused paste preserved).
+  - Target `<select>` populated from open terminals list (shows "(focused)"); send uses chosen or fallback to focused.
+  - "Insert tree context" button appends structured `[context from tree]\n<path>` into the task textarea.
+  - Updated "Send task to target", improved demo sample (multi-line), helper text.
+  - `npm run build` clean (tsc + vite, 39 modules).
+- Followed: sub-plan priorities 1+2, calm technical UI (reuse .vf-input/.vf-btn, dense, no new slop), controlled paths only (no new exec), references to both plans in future commit.
+- Builds verified before commit. Security mindset applied (transform only; PTY output from allow-listed spawns).
+
+**Next (still in this IN_PROGRESS):** begin capture output (buffer in PtyManager + get cmd + "Capture+strip" gesture) or real-output verification + track/commit/push for this slice. Regular push enforced.
+
+All per AGENT.md + sub-plan + Phase 2 main plan.

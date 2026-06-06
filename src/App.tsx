@@ -47,6 +47,8 @@ export default function VibeforgeShell() {
   const [terminals, setTerminals] = useState<TerminalSession[]>([]);
   const [focusedPtyId, setFocusedPtyId] = useState<string | null>(null);
   const [delegatePrompt, setDelegatePrompt] = useState(""); // for orchestration foundation quick delegate
+  const [lastTreeContext, setLastTreeContext] = useState<string | null>(null); // last path from FileTree for context injection into delegate
+  const [delegateTargetId, setDelegateTargetId] = useState<string | null>(null); // explicit target choice for Quick Delegate (overrides focused if set)
 
   // Helper to create a new terminal session (explicit create in Rust first).
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
@@ -189,7 +191,10 @@ export default function VibeforgeShell() {
           <div className="vf-sidebar-header" style={{ marginTop: 4 }}>STRUCTURED WORKFLOW + FILES (live)</div>
 
           <FileTree
-            onFileOpen={(p) => sendToFocusedTerminal(p)}
+            onFileOpen={(p) => {
+              setLastTreeContext(p);           // capture for Quick Delegate context injection
+              sendToFocusedTerminal(p);        // keep existing direct-to-focused paste behavior
+            }}
             onRefresh={() => setStatus("Tree refreshed • real disk")}
           />
 
@@ -305,40 +310,76 @@ export default function VibeforgeShell() {
             </button>
           </div>
 
-          {/* Orchestration foundation: minimal "Quick Delegate" gesture */}
+          {/* Orchestration foundation: Quick Delegate strengthened (context from FileTree + explicit target) */}
           <div className="vf-context-item" style={{ borderTop: "1px solid var(--vf-border)", paddingTop: 8 }}>
             <div style={{ fontWeight: 500, marginBottom: 4, fontSize: 11 }}>Quick Delegate (foundation)</div>
+
+            {/* Target selector: allow choosing any open terminal, not just focused */}
+            {terminals.length > 0 && (
+              <div style={{ marginBottom: 4 }}>
+                <div style={{ fontSize: 9, color: "var(--vf-muted)", marginBottom: 2 }}>Target terminal</div>
+                <select
+                  value={delegateTargetId || focusedPtyId || ""}
+                  onChange={(e) => setDelegateTargetId(e.target.value || null)}
+                  className="vf-input"
+                  style={{ width: "100%", fontSize: 10, padding: "2px 4px" }}
+                >
+                  {terminals.map((t) => (
+                    <option key={t.ptyId} value={t.ptyId}>
+                      {t.title} {t.ptyId === focusedPtyId ? "(focused)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <textarea
               value={delegatePrompt}
               onChange={(e) => setDelegatePrompt(e.target.value)}
               placeholder="Describe the task for the agent..."
               style={{ width: "100%", minHeight: 48, fontSize: 11, background: "var(--vf-surface)", border: "1px solid var(--vf-border)", color: "var(--vf-text)", padding: 4, borderRadius: 3 }}
             />
+
+            {/* Context injection from FileTree (last clicked file/dir) */}
+            {lastTreeContext && (
+              <button
+                className="vf-btn"
+                style={{ fontSize: 9, padding: "1px 4px", marginTop: 3 }}
+                onClick={() => {
+                  const ctx = `\n\n[context from tree]\n${lastTreeContext}`;
+                  setDelegatePrompt((p) => (p.trim() ? p + ctx : ctx.trim()));
+                }}
+              >
+                Insert tree context: {lastTreeContext.length > 28 ? "..." + lastTreeContext.slice(-25) : lastTreeContext}
+              </button>
+            )}
+
             <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
               <button
                 className="vf-btn"
                 style={{ fontSize: 10, padding: "2px 6px", flex: 1 }}
-                disabled={!focusedPtyId || !delegatePrompt.trim()}
+                disabled={!(delegateTargetId || focusedPtyId) || !delegatePrompt.trim()}
                 onClick={async () => {
-                  if (!focusedPtyId) return;
+                  const target = delegateTargetId || focusedPtyId;
+                  if (!target) return;
                   const taskMsg = `Task:\n${delegatePrompt.trim()}\n\nPlease complete this task. Use any provided context.`;
                   try {
-                    await invoke("write_to_terminal", { id: focusedPtyId, data: taskMsg + "\n" });
-                    setStatus(`Task sent to ${focusedPtyId}`);
+                    await invoke("write_to_terminal", { id: target, data: taskMsg + "\n" });
+                    setStatus(`Task sent to ${target}`);
                     setDelegatePrompt("");
                   } catch (e: any) {
                     setStatus(`Delegate failed: ${e}`);
                   }
                 }}
               >
-                Send task to focused
+                Send task to target
               </button>
               <button
                 className="vf-btn"
                 style={{ fontSize: 10, padding: "2px 6px" }}
                 onClick={async () => {
-                  // Demo the strip foundation command with sample output
-                  const sample = "Here is my analysis...\n\nClaude Code has stopped";
+                  // Demo the improved strip (multi-line + expanded phrases)
+                  const sample = "Here is my analysis of the bug...\n\nSome thinking...\nClaude Code has stopped";
                   try {
                     const cleaned: string = await invoke("strip_claude_stop_messages", { output: sample });
                     setStatus(`Strip demo: ${cleaned}`);
@@ -351,7 +392,7 @@ export default function VibeforgeShell() {
               </button>
             </div>
             <div style={{ fontSize: 9, color: "var(--vf-muted)", marginTop: 2 }}>
-              Writes formatted task to focused terminal. Strip util ready for clean capture.
+              Choose target • insert tree context • writes formatted task. Strip ready for capture.
             </div>
           </div>
 

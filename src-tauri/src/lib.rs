@@ -176,29 +176,39 @@ fn kill_terminal(state: State<'_, Arc<PtyManager>>, id: String) -> Result<(), St
 /// Orchestration foundation: strip common agent stop/termination messages
 /// so captured output is clean for further use (e.g. pasting back, diff, delegation).
 /// This is a pure transformation; no execution side effects.
+///
+/// SECURITY: read-only string transform on PTY output from controlled processes only.
+/// No new spawn or FS paths introduced here. Expand phrases only from verified real samples.
 #[tauri::command]
 fn strip_claude_stop_messages(output: String) -> String {
-    // Common stop phrases from Claude Code and similar tools (expand as needed).
-    // We truncate at the first match for clean "final answer" style output.
+    // Common stop/termination phrases from Claude Code (and similar agent CLIs).
+    // Keep conservative + precise; add only after seeing real output.
+    // Line-based scan for robustness across multi-line dumps (agents often end with a banner line).
     let stop_phrases = [
         "Claude Code has stopped",
         "Claude has stopped",
+        "Claude Code has stopped.",
         "The command has stopped",
         "has stopped",
         "Session ended",
         "Agent stopped",
+        "Task completed",
+        "Execution finished",
+        "╭─", // seen in some Claude TUI end states
     ];
 
-    let mut cleaned = output;
-    for phrase in stop_phrases {
-        if let Some(pos) = cleaned.find(phrase) {
-            cleaned = cleaned[..pos].trim_end().to_string();
-            // Append a marker so callers know stripping happened (useful for debugging/foundation).
-            cleaned.push_str("\n[orchestration: stop message stripped]");
-            break;
+    // Prefer line-aware truncate so we drop the stop banner + everything after it
+    // even when output contains embedded newlines from the agent session.
+    let lines: Vec<&str> = output.lines().collect();
+    for (i, line) in lines.iter().enumerate() {
+        if stop_phrases.iter().any(|p| line.contains(p)) {
+            let kept = lines[..i].join("\n").trim_end().to_string();
+            return kept + "\n[orchestration: stop message stripped]";
         }
     }
-    cleaned
+
+    // Fallback (no stop phrase found): return original (no marker).
+    output
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
