@@ -416,3 +416,52 @@ Use additional files in `track/` for specific areas when this file gets too long
 - Mark the plan file header if needed; this closes the loop on the reported issue.
 
 All per Vibeforge AGENT.md and the specific plan.
+
+---
+
+## 2025-06-09 — Transition to Real Product: Tauri Bootstrap Sub-Plan Created (Phase 0 Completion)
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/vibeforge-tauri-bootstrap-phase0-2025-06-09.md
+**Related:** plan/vibeforge-main-implementation-roadmap-2025-06-07.md (master), plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md (design direction MUST), AGENT.md
+
+**Context (from session start):**
+- User asked: "xem codebase đi, giờ bắt đầu làm gì trước đây" (look at the codebase, what should we start doing first).
+- Full review performed: read latest track, all plans (especially master roadmap + UI design + rewrite), spec, .vibeforge/config + skills/index, git status/branch/log, and full recursive file listing.
+- **Key finding:** The entire current codebase is **process foundation only**. Only AGENT.md, plan/ (6 files), spec/ (1), track/ (1), .vibeforge/ (config + 18 adapted skills), and .git exist. Zero application code, no Tauri, no Cargo.toml, no frontend source, no src-tauri. Git is clean on main after history sanitization.
+
+**Actions:**
+- Confirmed that "Project scaffolding + basic Tauri init" remains the only unfinished item explicitly listed under Phase 0 in the master roadmap.
+- Master roadmap "Immediate Next Steps" directly calls for: "Start Phase 0/1 sub-plans (Tauri init + basic workspace)" + create dedicated sub-plan before any implementation.
+- Per strict AGENT.md rules (never start significant work without plan/spec/track artifacts; always create plan first; work on plan/* branch; start sessions by reading track), created this new sub-plan instead of running `tauri init` or writing any code.
+- The new plan (`plan/vibeforge-tauri-bootstrap-phase0-2025-06-09.md`) is detailed, references the UI design plan as non-negotiable, activates the right skills (frontend-design-direction, make-interfaces-feel-better, rust-patterns, security-review, verification-loop, etc.), defines tiny verifiable steps, clear In/Out scope, anti-slop checklist tie-in, and Windows/portable priority.
+- Wrote the plan file following the exact template and conventions from AGENT.md and prior plans.
+- Appended this track entry.
+
+**Decisions:**
+- First real implementation work = complete the remaining Phase 0 scaffolding via the new sub-plan.
+- Frontend recommendation inside the plan (for the bootstrap step): React 19 + TS + Vite (Tauri) + Tailwind/design tokens. Rationale: matches the adapted skills in .vibeforge/skills/ (frontend-patterns etc.). Explicit decision gate in the plan.
+- No code, no `tauri create`, no structural changes until the plan branch is created and the plan file is the source of truth for the work.
+- Git discipline will be followed exactly: dedicated `plan/vibeforge-tauri-bootstrap-phase0-2025-06-09` branch for all bootstrap commits.
+
+**Verification (so far):**
+- Plan file created and contains full required sections (Goal, Scope, Approach with numbered steps, Risks, Success Criteria, Activated Skills, Artifacts).
+- Track entry added.
+- Current working tree still clean (this change will be committed on the future plan branch).
+
+**Impact:**
+- The "meta/setup" era is now formally closed in the record.
+- Any new session or agent now has a clear, self-contained "what to do first" artifact (load AGENT.md + latest track + master roadmap + UI design plan + this new bootstrap plan).
+- The structured workflow is self-reinforcing: even the decision of "what to build first" was captured in plan/ + track/ before touching the product.
+
+**Next (immediate):**
+- Create/switch to the plan branch: `git checkout -b plan/vibeforge-tauri-bootstrap-phase0-2025-06-09`
+- Follow the plan steps in order (start with prerequisites + stack confirmation, then actual `tauri init` as step 3).
+- After each small verifiable step (init complete, shell + tokens in place, first successful dev/build, security light pass), commit with reference to the plan, push, and append short update to track.
+- When bootstrap is verified DONE per the success criteria in the plan: mark the plan DONE, record SHAs, then the subsequent work must start with a **new Phase 1 sub-plan** (Core Workspace & Project Management).
+- User: after the branch + first commits, the plan branch can be pushed with `-u`.
+
+**Overall Project Health:** Process foundations complete and battle-tested (including painful history rewrites). Ready for the first real lines of the Vibeforge desktop app. Design-first + anti-slop + git discipline remain enforced.
+
+All per Vibeforge AGENT.md.
