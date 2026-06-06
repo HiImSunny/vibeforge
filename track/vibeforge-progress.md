@@ -827,7 +827,9 @@ All per AGENT.md. The terminal list is now polished and ready.
 - Follows sub-plan steps 2-4 for foundation (surface decision: Tauri commands on top of PTY; core strip + minimal UI gesture).
 
 **Git:**
-- Will push with reference to sub-plan + main Phase 2 plan.
+- Commit + push: d347d19 (orchestration foundation start - strip cmd + Quick Delegate UI).
+- Regular push done.
+- SHA recorded.
 
 ---
 
