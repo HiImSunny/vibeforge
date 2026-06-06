@@ -246,16 +246,15 @@ button:active, .vf-btn:active {
 
 .terminal-list-item {
   display: flex;
-  align-items: center;
-  min-height: 30px; /* good hit area */
-  padding: 5px 8px;
+  flex-direction: column;
+  min-height: 42px; /* better hit area, two lines like Stitch */
+  padding: 6px 8px;
   font-size: 11px;
   line-height: 1.2;
   cursor: pointer;
   border-bottom: 1px solid var(--vf-border);
-  white-space: nowrap;
-  overflow: hidden;
   color: var(--vf-text);
+  gap: 2px;
 }
 
 .terminal-list-item:hover {
@@ -264,8 +263,16 @@ button:active, .vf-btn:active {
 
 .terminal-list-item.focused {
   background: #161a20;
-  border-left: 3px solid #4a5568; /* strong but calm focus */
+  border-left: 3px solid var(--vf-accent-claude); /* calm focus, can be dynamic per accent later */
   font-weight: 500;
+}
+
+.terminal-list-item .main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .terminal-title {
@@ -274,10 +281,20 @@ button:active, .vf-btn:active {
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--vf-muted);
+  font-family: var(--vf-mono, monospace);
 }
 
 .terminal-list-item.focused .terminal-title {
   color: var(--vf-text);
+}
+
+.terminal-list-item .sub {
+  font-size: 10px;
+  color: var(--vf-outline);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 22px; /* align under the name */
 }
 
 .terminal-close {

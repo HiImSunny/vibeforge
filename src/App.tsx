@@ -24,6 +24,7 @@ const AGENTS: Agent[] = [
   { id: "codex", label: "codex", accent: "codex" },
   { id: "gemini", label: "gemini", accent: "gemini" },
   { id: "aider", label: "aider", accent: "general" },
+  { id: "opencode", label: "opencode", accent: "general" },
 ];
 
 type TerminalSession = {
@@ -229,6 +230,8 @@ export default function VibeforgeShell() {
               )}
               {terminals.map((t) => {
                 const isFocused = t.ptyId === focusedPtyId;
+                // Simple sub status to match Stitch two-line list items
+                const subStatus = isFocused ? "live" : (t.title.includes("claude") || t.title.includes("codex") || t.title.includes("gemini") ? "ready" : "shell");
                 return (
                   <div
                     key={t.ptyId}
@@ -236,18 +239,21 @@ export default function VibeforgeShell() {
                     onClick={() => focusTerminal(t.ptyId)}
                     title={t.title}
                   >
-                    <span className={`vf-badge ${t.accent}`} style={{ fontSize: 9, marginRight: 6 }}>{t.accent}</span>
-                    {t.hasRecentActivity && !isFocused && (
-                      <span className="activity-dot" title="New output" />
-                    )}
-                    <span className="terminal-title" style={{ fontFamily: "var(--vf-mono, monospace)" }}>{t.title}</span>
-                    <button
-                      className="terminal-close"
-                      onClick={(e) => { e.stopPropagation(); closeTerminal(t.ptyId); }}
-                      title="Close terminal (kill PTY)"
-                    >
-                      ✕
-                    </button>
+                    <div className="main">
+                      <span className={`vf-badge ${t.accent}`} style={{ fontSize: 9, marginRight: 6 }}>{t.accent}</span>
+                      {t.hasRecentActivity && !isFocused && (
+                        <span className="activity-dot" title="New output" />
+                      )}
+                      <span className="terminal-title" style={{ fontFamily: "var(--vf-mono, monospace)" }}>{t.title}</span>
+                      <button
+                        className="terminal-close"
+                        onClick={(e) => { e.stopPropagation(); closeTerminal(t.ptyId); }}
+                        title="Close terminal (kill PTY)"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="sub">{subStatus}</div>
                   </div>
                 );
               })}
@@ -301,18 +307,18 @@ export default function VibeforgeShell() {
           {!rightCollapsed && (
             <>
               <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
-                <span className="flex items-center gap-xs"><span className="material-symbols-outlined text-[14px]">language</span> Browser Stub</span>
-                <span className="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+                <span>🌐 Browser Stub</span>
+                <span>›</span>
               </button>
 
               <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
-                <span className="flex items-center gap-xs"><span className="material-symbols-outlined text-[14px]">api</span> HTTP Stub</span>
-                <span className="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+                <span>🔌 HTTP Stub</span>
+                <span>›</span>
               </button>
 
               <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
-                <span className="flex items-center gap-xs"><span className="material-symbols-outlined text-[14px]">difference</span> AI Diff Review</span>
-                <span className="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+                <span>📊 AI Diff Review</span>
+                <span>›</span>
               </button>
 
               {/* Quick Delegate — styled closer to Stitch mock for better polish and UX */}

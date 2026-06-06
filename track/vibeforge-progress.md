@@ -1047,6 +1047,24 @@ All strictly per AGENT.md (reads first, track entry before code, small steps, se
 - This is the highest-leverage change for "khó tập trung" complaint and directly implements the "collapsible panels" requirement from the UI design plan.
 - Adapted visuals and component structure (topbar pills with colored bottom accents, stub buttons with icons, Quick Delegate labels/layout, terminal viewer header with "Active" badge, result area) to match the provided Stitch HTML mock more closely.
 - Updated design system in App.css: blended tokens (surface-container-*, outline, spacing xs/gutter/hit-area, label/body/code font stacks from Stitch Tailwind config) while preserving the calm technical palette and anti-slop principles from the project UI design plan.
+
+**Further UI alignment to Stitch mock (user request "làm cho giống cái stitch"):**
+- Enhanced terminal list items to two-line layout (main title + sub status like "live"/"ready" in Stitch mock) with improved CSS for density and focus.
+- Cleaned right panel stubs to proper buttons with emoji icons + chevrons (fixed mangled "language Browser Stubchevron_right" rendering from missing Material Symbols font; now renders cleanly without external deps).
+- Updated TerminalPane viewer header and list rendering for closer visual match (ACTIVE badge style, subtext alignment).
+- Added "opencode" to topbar agents (now claude/codex/gemini/aider/opencode); updated Rust allow-list + Windows cmd.exe /c shim handling for script-based agents.
+- Minor polish: agent pills bottom accents, Quick Delegate labels, result area, consistent with the provided Stitch HTML structure and the UI design plan (collapsible panels, calm technical, no slop).
+- `npm run build` verified clean after changes.
+- User provided new Stitch screenshot for comparison; further tweaks can be iterative in next micro-steps.
+
+**Status update:** UI adaptation slice substantially complete for this round. Track entry closed for this feedback loop. All per AGENT.md + UI design plan + Phase 2 plan (Evolved Approach).
+
+**Git (this step):**
+- Modified: src-tauri/src/lib.rs (opencode + spawn fix), src/App.css (tokens + list/viewer polish), src/App.tsx (agents + list items + stubs + Quick Delegate).
+- Will commit + push immediately to save progress on plan branch.
+- References: plan/vibeforge-phase2-terminals-pty-2025-06-09.md, plan/vibeforge-ui-design-system-and-frontend-first-2025-06-07.md, track/vibeforge-progress.md
+
+All strictly per AGENT.md (reads first, track before/after code, small verifiable steps, git discipline on plan branch, regular push).
 - `npm run build` ✓ clean. Real functionality (PTY, capture+strip, delegate with target/context, FileTree) fully preserved.
 
 **Next small steps (still in this track entry):**

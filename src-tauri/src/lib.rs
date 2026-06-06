@@ -64,11 +64,30 @@ fn create_terminal(
         // Only allow a very small allow-list for now (defense in depth).
         // In a real product this list would come from a user-editable registry
         // with validation.
-        let allowed = ["powershell.exe", "cmd.exe", "claude", "codex", "gemini", "aider"];
+        let allowed = ["powershell.exe", "cmd.exe", "claude", "codex", "gemini", "aider", "opencode"];
         if !allowed.iter().any(|a| c.eq_ignore_ascii_case(a) || c.ends_with(a)) {
             return Err("command not in allow list for this Phase 2 slice".into());
         }
-        CommandBuilder::new(&c)
+
+        if cfg!(windows) && ["codex", "gemini", "aider", "opencode"].iter().any(|a| c.eq_ignore_ascii_case(a)) {
+            // These agents are frequently installed via npm/pip on Windows and resolve to
+            // .cmd shims in %APPDATA%\npm (or similar). Direct CreateProcessW on the shim
+            // fails with "not a valid Win32 application" (os error 193).
+            //
+            // We launch via `cmd.exe /c <command>` so that Windows command processor + PATHEXT
+            // can resolve the proper executable/script. This is safe because we only ever pass
+            // names from our hard-coded allow-list (controlled paths only).
+            //
+            // Note: cmd.exe becomes the direct child of the PTY; the agent is its child.
+            // This is acceptable for interactive REPL-style agents and matches how many
+            // terminal emulators handle such tools on Windows.
+            let mut cb = CommandBuilder::new("cmd.exe");
+            cb.arg("/c");
+            cb.arg(c);
+            cb
+        } else {
+            CommandBuilder::new(&c)
+        }
     } else if cfg!(windows) {
         let mut c = CommandBuilder::new("powershell.exe");
         c.arg("-NoLogo");
