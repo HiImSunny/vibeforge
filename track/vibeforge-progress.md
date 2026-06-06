@@ -601,6 +601,9 @@ The drive toward the final complete product continues. All per AGENT.md.
 
 All strictly per Vibeforge AGENT.md (plan/spec/track + git discipline + security for PTY). The complete focused product continues to be built in small verifiable increments.
 
-**Git (will be updated post-command):**
-- Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09
-- First commit on this branch will be the plan + track creation.
+**Git:**
+- Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09 (dedicated per AGENT.md)
+- Plan + track creation commit: be4586c (pushed to origin)
+- SHA range on push: 81da73c..be4586c
+- Remote branch created and advanced. Incidental Cargo.lock was never added (left untracked).
+- Follow-up commits on this branch will continue the Phase 2 work with references to this plan.
