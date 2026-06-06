@@ -52,7 +52,7 @@ Follow AGENT.md: security-review for any execution, small steps, regular push.
 
 ## Post-Work (to be filled)
 - Sub-plan created.
-- First foundation implementation:
+- First foundation implementation (initial):
   - Added `strip_claude_stop_messages` Tauri command in Rust (lib.rs) with common stop phrases + marker. Registered and security-commented.
   - Enhanced right "CONTEXT • SEND TO AGENT" panel with "Quick Delegate" foundation gesture: textarea for task + "Send task to focused" (formats and writes via existing write_to_terminal to the focused ptyId). Also "Demo strip" button using the new command on sample output.
 - Used the dynamic terminal list + focused viewer for the delegation target (no new execution surface).
@@ -60,3 +60,21 @@ Follow AGENT.md: security-review for any execution, small steps, regular push.
 - Commits + pushes on plan branch with references to sub-plan.
 - Track updated.
 - Next: more gestures, actual output capture for stripped results, decide on CLI vs in-app.
+
+**2025-06-10 continuation slice (this session):**
+- Expanded strip (priority 1): line-based multi-line handling (split lines, truncate at first stop line), more phrases from real usage patterns (incl. punctuated + "Task completed"), stronger security comment. cargo check ✓ (44873a8).
+- Strengthened Quick Delegate (priority 2, main goal): 
+  - FileTree context: last clicked path captured + "Insert tree context" button appends structured block to textarea (context from tree flows into task without breaking direct send-to-term).
+  - Target choice: <select> over open terminals (shows which is focused); Send now targets chosen (or focused fallback). "Send task to target".
+  - Demo sample made multi-line to match improved strip.
+  - npm run build ✓.
+- Two commits on branch: 44873a8 (feat changes) + 2d18376 (record SHA + progress in track).
+- Pushed. All references sub-plan + Phase 2 main plan + track.
+- Capture output (priority 3) + deeper CLI decision + real Claude verification noted as immediate next micro-slice (begin buffer + get_terminal_output cmd + "Capture last + strip" gesture in panel).
+- Security: only re-used controlled write_to_terminal on allow-listed PTYs; pure read-only strip; no new execution surface.
+- Track entries appended before/after code + after push (per AGENT.md).
+- UI remains calm technical, dense, purposeful per the UI design plan (no slop, reuse tokens, good hit areas).
+
+**Status:** Slice delivered and pushed. Sub-plan remains IN_PROGRESS for capture + verification follow-ups. Main Phase 2 plan also updated in spirit via track. Regular push done. 
+
+All strictly per AGENT.md.
