@@ -49,6 +49,7 @@ export default function VibeforgeShell() {
   const [delegatePrompt, setDelegatePrompt] = useState(""); // for orchestration foundation quick delegate
   const [lastTreeContext, setLastTreeContext] = useState<string | null>(null); // last path from FileTree for context injection into delegate
   const [delegateTargetId, setDelegateTargetId] = useState<string | null>(null); // explicit target choice for Quick Delegate (overrides focused if set)
+  const [lastCaptured, setLastCaptured] = useState<string>(""); // last result from "Capture last + strip" (for review / copy)
 
   // Helper to create a new terminal session (explicit create in Rust first).
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
@@ -367,6 +368,7 @@ export default function VibeforgeShell() {
                     await invoke("write_to_terminal", { id: target, data: taskMsg + "\n" });
                     setStatus(`Task sent to ${target}`);
                     setDelegatePrompt("");
+                    setLastCaptured(""); // clear previous capture when sending new work
                   } catch (e: any) {
                     setStatus(`Delegate failed: ${e}`);
                   }
@@ -390,9 +392,63 @@ export default function VibeforgeShell() {
               >
                 Demo strip
               </button>
+              <button
+                className="vf-btn"
+                style={{ fontSize: 10, padding: "2px 6px" }}
+                disabled={!(delegateTargetId || focusedPtyId)}
+                onClick={async () => {
+                  const target = delegateTargetId || focusedPtyId;
+                  if (!target) return;
+                  try {
+                    const raw: string = await invoke("get_terminal_output", { id: target });
+                    const cleaned: string = await invoke("strip_claude_stop_messages", { output: raw });
+                    setLastCaptured(cleaned);
+                    setStatus(`Captured ${raw.length} chars → stripped to ${cleaned.length} (from ${target})`);
+                  } catch (e: any) {
+                    setStatus(`Capture failed: ${e}`);
+                  }
+                }}
+              >
+                Capture last + strip
+              </button>
             </div>
+
+            {/* Small result area for the last captured+stripped output (foundation for review / re-use) */}
+            {lastCaptured && (
+              <div style={{ marginTop: 6 }}>
+                <div style={{ fontSize: 9, color: "var(--vf-muted)", marginBottom: 2 }}>
+                  Last captured + stripped:
+                </div>
+                <textarea
+                  readOnly
+                  value={lastCaptured}
+                  style={{
+                    width: "100%",
+                    minHeight: 52,
+                    fontSize: 9,
+                    background: "var(--vf-surface)",
+                    border: "1px solid var(--vf-border)",
+                    color: "var(--vf-text)",
+                    padding: 4,
+                    borderRadius: 3,
+                    fontFamily: "var(--vf-mono, monospace)",
+                  }}
+                />
+                <button
+                  className="vf-btn"
+                  style={{ fontSize: 9, padding: "1px 4px", marginTop: 2 }}
+                  onClick={() => {
+                    navigator.clipboard?.writeText(lastCaptured).catch(() => {});
+                    setStatus("Copied captured output to clipboard");
+                  }}
+                >
+                  Copy
+                </button>
+              </div>
+            )}
+
             <div style={{ fontSize: 9, color: "var(--vf-muted)", marginTop: 2 }}>
-              Choose target • insert tree context • writes formatted task. Strip ready for capture.
+              Choose target • insert tree context • Capture last output then strip. All via existing PTY surface.
             </div>
           </div>
 

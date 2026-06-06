@@ -930,3 +930,54 @@ All per Vibeforge AGENT.md (plan/spec/track + git + security for PTY/orchestrati
 **Session close note (2025-06-10):** All mandated reads done at open. IN_PROGRESS entry appended *before any code*. Two priorities (expand strip + strengthen Quick Delegate with context+target) delivered in small steps with build verifies between. 3 commits + 3 pushes on the plan branch (SHAs: 44873a8 feat, 2d18376 record, bc8a6f3 docs plan update). Sub-plan post-work + main track updated. Security + design direction + AGENT.md Git/plan-first discipline followed exactly. No capture impl this slice (delegate was the explicit near-term goal); ready for immediate next micro on same branch.
 
 All per AGENT.md + sub-plan + Phase 2 main plan. Tree clean at end.
+
+---
+## 2025-06-10 — Begin capture output foundation (PtyManager buffer + get_terminal_output + "Capture last + strip" gesture)
+
+**Status:** IN_PROGRESS
+
+**Plan:** plan/vibeforge-phase2-orchestration-foundation-2025-06-10.md (sub-plan, priority 3: "Bắt đầu có cơ chế capture output") + plan/vibeforge-phase2-terminals-pty-2025-06-09.md (main)
+
+**Actions (mandatory start):**
+- Re-read AGENT.md + latest track (focus 06-09+) + both Phase 2 plans + master roadmap + UI design plan.
+- Confirmed branch `plan/vibeforge-phase2-terminals-pty-2025-06-09`, clean tree, latest tip 771a658.
+- **Appended this IN_PROGRESS entry immediately** (before touching any code) per AGENT.md.
+- (Next) todo_write for the micro-slice; then implement.
+
+**Focus for this micro-slice (per sub-plan + previous track "Next"):**
+- Add bounded output buffer (e.g. last ~16k chars) inside PtyManager so we can retrieve what a terminal has emitted so far.
+- New Tauri command `get_terminal_output(id)` returning the recent buffer (pure read, no side effects).
+- Update reader thread to populate the buffer on every chunk (with truncate to bound memory).
+- Wire a minimal "Capture last + strip" button in the existing Quick Delegate panel (re-uses target selector + existing strip command).
+- Surface the cleaned result (status + optional small result area for review / further use).
+- Security: only buffers for PTYs *we* created via controlled allow-list; output never leaves the PTY path we already trust.
+- cargo check + npm run build after changes.
+- Append short progress to track + commit + push referencing the sub-plan + Phase 2 plan.
+- Keep UI calm/dense/no slop.
+
+**Decisions:**
+- Capture is "post-facto" for foundation (get what has already streamed) — not real-time mutation of the live xterm.
+- This prepares for future "when agent finishes, auto-capture + strip + offer to delegate back".
+- No new PTY creation or headless CLI yet (still using visible terminal list surface).
+- Buffer per-terminal, dropped on kill_terminal.
+
+**Verification targets:**
+- Builds clean.
+- Launch terminal, run some commands (or agent), use "Capture last + strip" → see truncated + cleaned output in status / result.
+- Can target any open terminal via the existing selector.
+- All changes small, commented for security, committed/pushed.
+
+**Git:** All on plan/vibeforge-phase2-terminals-pty-2025-06-09. Reference both plans in messages. Push after the impl + verify slice.
+
+**Progress this micro-slice:**
+- Added `output_buffers` (bounded last ~16k chars) to PtyManager.
+- Init buffer on create_terminal; clean on kill_terminal.
+- Reader thread now appends every chunk + truncates (via cloned Arc<PtyManager>).
+- New `get_terminal_output(id)` Tauri command (registered).
+- UI: "Capture last + strip" button (re-uses the target selector we added previously) + small read-only result textarea with Copy button.
+- On send new task we clear the previous captured result.
+- `cargo check` ✓ + `npm run build` ✓ (clean).
+- Security comments added at every new surface.
+- This completes priority 3 from the sub-plan for the foundation slice.
+
+All strictly per AGENT.md (reads first, track entry before code, small steps, security for orchestration/PTY output, regular push).

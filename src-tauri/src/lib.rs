@@ -19,14 +19,21 @@ use tauri::{AppHandle, Emitter, State};
 
 /// Simple manager for multiple concurrent PTYs.
 /// Keyed by string id (we use the pane index as string "0", "1", ... from frontend).
+///
+/// For orchestration foundation we also keep a bounded recent-output buffer per PTY
+/// so the UI can later "capture" what an agent printed (for strip + review / re-use).
+/// Buffers are only populated for terminals we created via the controlled allow-list path.
 struct PtyManager {
     ptys: Mutex<HashMap<String, PtyPair>>,
+    /// Bounded recent output (last ~16k chars) for capture + strip use cases.
+    output_buffers: Mutex<HashMap<String, String>>,
 }
 
 impl Default for PtyManager {
     fn default() -> Self {
         Self {
             ptys: Mutex::new(HashMap::new()),
+            output_buffers: Mutex::new(HashMap::new()),
         }
     }
 }
@@ -83,10 +90,20 @@ fn create_terminal(
         map.insert(id.clone(), pair);
     }
 
+    // Also init the output buffer for this terminal (orchestration capture foundation).
+    {
+        let mut bufs = state.output_buffers.lock().map_err(|e| e.to_string())?;
+        bufs.insert(id.clone(), String::new());
+    }
+
     // Start a background reader thread that streams output to the frontend.
     // We capture a clone of the AppHandle (cheap) and the id.
     let reader_id = id.clone();
     let reader_app = app.clone();
+
+    // Clone the Arc<PtyManager> so the reader thread can also update the output buffer.
+    // This is safe: the thread only ever appends/truncates for IDs we created.
+    let pty_mgr_for_reader: Arc<PtyManager> = state.inner().clone();
 
     // We need to clone the reader from the master we just stored.
     // Because the pair is now inside the Mutex, we extract a fresh reader here.
@@ -115,6 +132,19 @@ fn create_terminal(
                             "data": chunk
                         }),
                     );
+
+                    // Orchestration foundation: also append to the bounded per-PTY buffer
+                    // so we can later do "get recent output → strip" without touching the live xterm.
+                    if let Ok(mut bufs) = pty_mgr_for_reader.output_buffers.lock() {
+                        let entry = bufs.entry(reader_id.clone()).or_insert_with(String::new);
+                        entry.push_str(&chunk);
+                        // Bound memory: keep only the most recent ~16k chars per terminal.
+                        const MAX: usize = 16384;
+                        if entry.len() > MAX {
+                            let start = entry.len() - (MAX / 2);
+                            *entry = entry[start..].to_string();
+                        }
+                    }
                 }
                 Err(_) => break,
             }
@@ -169,6 +199,12 @@ fn resize_terminal(
 fn kill_terminal(state: State<'_, Arc<PtyManager>>, id: String) -> Result<(), String> {
     let mut map = state.ptys.lock().map_err(|e| e.to_string())?;
     map.remove(&id);
+
+    // Also drop the output buffer (orchestration capture).
+    if let Ok(mut bufs) = state.output_buffers.lock() {
+        bufs.remove(&id);
+    }
+
     // Dropping the PtyPair will close the master/slave and (best effort) terminate the child.
     Ok(())
 }
@@ -211,6 +247,17 @@ fn strip_claude_stop_messages(output: String) -> String {
     output
 }
 
+/// Orchestration foundation: return the recent captured output for a given terminal id.
+/// This lets the UI (or future vibeforge-agent) retrieve what an agent actually printed
+/// so we can run strip_claude_stop_messages on it after the agent finishes.
+/// Pure read-only; only data that came from PTYs we created via the allow-listed path.
+/// SECURITY: no execution, no FS, no mutation of live PTY — just a bounded view of already-emitted bytes.
+#[tauri::command]
+fn get_terminal_output(state: State<'_, Arc<PtyManager>>, id: String) -> Result<String, String> {
+    let bufs = state.output_buffers.lock().map_err(|e| e.to_string())?;
+    Ok(bufs.get(&id).cloned().unwrap_or_default())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -222,7 +269,8 @@ pub fn run() {
             write_to_terminal,
             resize_terminal,
             kill_terminal,
-            strip_claude_stop_messages
+            strip_claude_stop_messages,
+            get_terminal_output
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
