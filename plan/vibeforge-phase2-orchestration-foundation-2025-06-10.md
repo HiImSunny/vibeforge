@@ -75,6 +75,15 @@ Follow AGENT.md: security-review for any execution, small steps, regular push.
 - Track entries appended before/after code + after push (per AGENT.md).
 - UI remains calm technical, dense, purposeful per the UI design plan (no slop, reuse tokens, good hit areas).
 
-**Status:** Slice delivered and pushed. Sub-plan remains IN_PROGRESS for capture + verification follow-ups. Main Phase 2 plan also updated in spirit via track. Regular push done. 
+**2025-06-10 capture micro-slice (delivered):**
+- Implemented bounded per-PTY output buffer inside PtyManager (16k cap, populated in the existing reader thread, cleaned on kill).
+- Added `get_terminal_output(id)` Tauri command.
+- Wired "Capture last + strip" button + result textarea + Copy in the Quick Delegate panel (re-uses the target selector + the strip command we already had).
+- cargo check + npm run build clean.
+- Commit 7a4434e + push.
+- Completes the "begin capture output mechanism" item from the sub-plan.
+- Still using the visible dynamic terminal list surface (no headless CLI yet).
+
+**Status:** Capture foundation delivered. Sub-plan remains IN_PROGRESS for any follow-up (real Claude verification, CLI surface decision, richer gestures, or moving to headless). All pushes on the plan branch. Regular discipline followed.
 
 All strictly per AGENT.md.

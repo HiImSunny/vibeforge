@@ -980,4 +980,9 @@ All per AGENT.md + sub-plan + Phase 2 main plan. Tree clean at end.
 - Security comments added at every new surface.
 - This completes priority 3 from the sub-plan for the foundation slice.
 
+**Git (this micro-slice):**
+- Commit: 7a4434e (feat(phase2-orchestration): begin capture output - PtyManager bounded buffer + get_terminal_output cmd + Capture last + strip UI gesture)
+- Push succeeded (771a658..7a4434e).
+- SHA recorded. Message references sub-plan + main Phase 2 plan + track.
+
 All strictly per AGENT.md (reads first, track entry before code, small steps, security for orchestration/PTY output, regular push).
