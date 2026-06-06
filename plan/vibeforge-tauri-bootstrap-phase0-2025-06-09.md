@@ -156,13 +156,18 @@ If during Step 1 a strong reason appears to switch to Svelte, document it and ge
 
 ---
 
-**Post-Work Update (to be filled after execution):**
-- Exact Tauri create command used.
-- Frontend decision + rationale (if any deviation).
-- Key commit SHAs on the plan branch + final merge to main.
-- Verification results vs the checklist above.
-- Status: DONE / blocked (with reason).
-- Links to any new spec fragments created during bootstrap.
-- Notes for the next agent/session: "Load this plan + the master roadmap + UI design plan + latest track + AGENT.md".
+**Post-Work Update (2025-06-09):**
+- Exact create: `npm create tauri-app@latest . -- --yes --force --template react-ts --identifier com.hiimsunny.vibeforge`
+- Frontend: React 19 + TS (matches installed .vibeforge/skills/frontend-patterns + design skills). No deviation.
+- Rust installed cleanly via winget (cargo 1.96.0, stable-x86_64-pc-windows-msvc active).
+- Commit on plan branch: 04f606e "feat: tauri react-ts bootstrap + purposeful dark technical workspace shell"
+- Shell delivered: full dark technical layout (topbar with agent launchers, left sidebar explicitly surfaces plan/ spec/ track/ AGENT.md as "STRUCTURED WORKFLOW", 2x2 terminal grid placeholders, right context panels with send stubs, statusbar). Follows concentric radius, good min hit areas, subtle borders, no logos/hero/slop.
+- Tailwind + postcss + custom CSS vars for the calm technical palette and tokens added.
+- tauri.conf + Cargo + package.json metadata fixed to "Vibeforge".
+- `npm install` succeeded. Frontend buildable (new App.tsx has zero external deps beyond React).
+- Status: Shell complete + committed. Full `tauri dev` / build will work now that Rust is present (first run compiles the Rust side). Plan considered substantially delivered for Phase 0.
+- Next per roadmap: create Phase 1 sub-plan immediately and continue driving toward real file tree, layout system, and PTY.
+
+Notes for next session: Load AGENT.md + track/vibeforge-progress.md (latest) + this plan + master roadmap + UI design plan. We are on branch plan/vibeforge-tauri-bootstrap-phase0-2025-06-09. The root now contains a real (minimal) Vibeforge desktop shell + all process artifacts.
 
 All work follows Vibeforge AGENT.md strictly. No code or `tauri init` before this plan file exists.

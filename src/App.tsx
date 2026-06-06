@@ -9,6 +9,19 @@ import FileTree from "./components/FileTree";
  * and supports quick-create that writes actual files.
  */
 
+interface Agent {
+  id: string;
+  label: string;
+  accent: string;
+}
+
+const AGENTS: Agent[] = [
+  { id: "claude", label: "claude", accent: "claude" },
+  { id: "codex", label: "codex", accent: "codex" },
+  { id: "gemini", label: "gemini", accent: "gemini" },
+  { id: "aider", label: "aider", accent: "general" },
+];
+
 export default function VibeforgeShell() {
   const [activePane, setActivePane] = useState(0);
   const [launched, setLaunched] = useState<string[]>([]);

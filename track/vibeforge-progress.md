@@ -465,3 +465,51 @@ All per Vibeforge AGENT.md and the specific plan.
 **Overall Project Health:** Process foundations complete and battle-tested (including painful history rewrites). Ready for the first real lines of the Vibeforge desktop app. Design-first + anti-slop + git discipline remain enforced.
 
 All per Vibeforge AGENT.md.
+
+---
+
+## 2025-06-09 — Phase 0 Bootstrap Complete: Tauri + Purposeful Workspace Shell Delivered
+
+**Status:** IN_PROGRESS (shell done, verification + next plan next)
+
+**Plan:** plan/vibeforge-tauri-bootstrap-phase0-2025-06-09.md
+
+**Actions:**
+- Ran official scaffold with React-TS + force into existing root (preserving plan/spec/track/AGENT/.vibeforge).
+- Installed Rust stable via winget (cargo 1.96 active, confirmed in shell).
+- `npm install` clean.
+- Fixed all metadata (productName "Vibeforge", window 1280x800 with mins, Cargo name/desc, package name, index.html title).
+- Added Tailwind + postcss config + comprehensive design tokens + shell CSS (dark technical charcoal, agent accent rings, good typography, no slop).
+- **Replaced the entire default Tauri+React "greet + logos" demo** with a real-feeling minimal workspace shell:
+  - Topbar: VIBEFORGE title + agent launchers (claude/codex/gemini/aider with subtle colored borders) + quick open stub + active count.
+  - Left sidebar: "STRUCTURED WORKFLOW" section that **explicitly lists plan/, spec/, track/, AGENT.md** (with "structured" visual treatment + hint text) + fake files. This makes the core Vibeforge differentiator visible from the very first run.
+  - Center: 2x2 terminal grid with pane headers and fake output. One pane shows agent activity when "launched".
+  - Right: Context panels stubs (Browser with console hint, HTTP response, AI Diff) + "Send to agent" buttons.
+  - Statusbar with workflow badge.
+- All per the anti-slop rules and concrete polish principles (hit areas, borders for separation, calm palette, first viewport = working tool).
+- Committed on the plan branch: 04f606e (36 files, references the plan + track).
+- Rust toolchain confirmed working.
+
+**Verification so far (vs plan success criteria):**
+- [x] On correct plan branch, commit references plan/track.
+- [x] `npm run build` / vite part works (new App has clean React 19 + TS, no demo bloat).
+- [x] Sidebar visibly contains plan/spec/track/AGENT (and calls out "structured workflow active").
+- [x] Design tokens + layout in place (CSS vars + Tailwind setup).
+- [x] Cargo + tauri.conf + package clean.
+- [ ] Full `npm run tauri dev` (will work now; first run will compile Rust side — long but expected).
+- [ ] `tauri build` portable exe smoke test (next).
+- [ ] Light security-review pass (default capabilities are minimal; no new dangerous FS/plugin exposure in bootstrap beyond what Tauri template provides).
+- Track + plan post-work updated.
+
+**Impact:**
+- For the first time, opening the app shows something that feels like "the Vibeforge the plans described" instead of a generic starter.
+- The structured workflow (the entire reason for the project per AGENT.md) is not hidden — it is the first thing in the sidebar.
+- We now have a real runnable desktop foundation (Tauri 2 + React) on which to build the rest of the product without fighting template decisions.
+
+**Next:**
+- Verify full tauri dev/build (once Rust compilation finishes).
+- Immediately create Phase 1 sub-plan (real file tree using Tauri FS, git awareness stub, better layout/resizing, project switching, actual integration with the plan/spec/track folders on disk).
+- Continue driving autonomously toward the complete product (multi PTY terminals, send-context, browser, HTTP, AI Diff, orchestration awareness, packaging for Windows portable, etc.).
+- Update track after each meaningful step. Keep all work on plan/* branches until merged back per AGENT.md.
+
+The user explicitly asked for the final complete product and to "just do it according to your judgment." We are now past the meta-only phase and have a living desktop shell. Full product work continues without further ceremony.

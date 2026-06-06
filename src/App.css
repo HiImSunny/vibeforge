@@ -6,9 +6,7 @@
    - Agent accents subtle, not decorative blobs
 */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Design tokens + all .vf- layout styles (self-contained, no external Tailwind needed for Phase 0/1 shell) */
 
 :root {
   --vf-bg: #0a0c10;
