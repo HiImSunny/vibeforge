@@ -4,34 +4,18 @@ import FileTree from "./components/FileTree";
 import TerminalPane from "./components/TerminalPane";
 import { invoke } from "@tauri-apps/api/core";
 
-/**
- * Vibeforge — Phase 0/1 shell + Phase 2 real PTY terminals
- *
- * 2x2 grid of real xterm + portable-pty terminals.
- * Topbar agent buttons (claude/codex/gemini/aider) now spawn real PTYs with the matching command (allow-listed in Rust).
- * + New opens default shell PTY.
- * Follows UI design (calm technical, agent accent borders, dense purposeful, no slop) + AGENT.md.
- */
-
-interface Agent {
-  id: string;
-  label: string;
-  accent: string;
-}
-
-const AGENTS: Agent[] = [
-  { id: "claude", label: "claude", accent: "claude" },
-  { id: "codex", label: "codex", accent: "codex" },
-  { id: "gemini", label: "gemini", accent: "gemini" },
-  { id: "aider", label: "aider", accent: "general" },
-  { id: "opencode", label: "opencode", accent: "general" },
+const AGENTS = [
+  { id: "claude", label: "Claude", accent: "claude" },
+  { id: "codex", label: "Codex", accent: "codex" },
+  { id: "gemini", label: "Gemini", accent: "gemini" },
+  { id: "aider", label: "Aider", accent: "aider" },
 ];
 
 type TerminalSession = {
   ptyId: string;
   title: string;
   accent: string;
-  hasRecentActivity?: boolean; // for subtle indicator in list when not focused
+  hasRecentActivity?: boolean;
 };
 
 let terminalCounter = 0;
@@ -42,49 +26,31 @@ function generatePtyId(): string {
 
 export default function VibeforgeShell() {
   const [launched, setLaunched] = useState<string[]>([]);
-  const [status, setStatus] = useState("2 projects • 0 running agents • structured workflow active");
-
-  // Dynamic list of terminals (unlimited). Only one is focused at a time.
   const [terminals, setTerminals] = useState<TerminalSession[]>([]);
   const [focusedPtyId, setFocusedPtyId] = useState<string | null>(null);
-  const [delegatePrompt, setDelegatePrompt] = useState(""); // for orchestration foundation quick delegate
-  const [lastTreeContext, setLastTreeContext] = useState<string | null>(null); // last path from FileTree for context injection into delegate
-  const [delegateTargetId, setDelegateTargetId] = useState<string | null>(null); // explicit target choice for Quick Delegate (overrides focused if set)
-  const [lastCaptured, setLastCaptured] = useState<string>(""); // last result from "Capture last + strip" (for review / copy)
-  const [rightCollapsed, setRightCollapsed] = useState(false); // collapse right context panel for terminal focus (per UI design plan)
+  const [delegatePrompt, setDelegatePrompt] = useState("");
+  const [lastTreeContext, setLastTreeContext] = useState<string | null>(null);
+  const [delegateTargetId, setDelegateTargetId] = useState<string | null>(null);
+  const [lastCaptured, setLastCaptured] = useState<string>("");
+  const [rightCollapsed, setRightCollapsed] = useState(false);
+  const [status, setStatus] = useState("VIBEFORGE v2.4.1 • ready");
 
-  // Helper to create a new terminal session (explicit create in Rust first).
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
     const ptyId = generatePtyId();
     try {
       await invoke("create_terminal", { id: ptyId, command });
-    } catch (e: any) {
-      console.error("create_terminal failed at App level", e);
-      setStatus(`Failed to create terminal: ${e}`);
+    } catch {
+      setStatus(`Failed to create terminal`);
       return;
     }
-
-    const newSession: TerminalSession = {
-      ptyId,
-      title: baseTitle,
-      accent,
-      hasRecentActivity: false,
-    };
-
-    setTerminals((prev) => [...prev, newSession]);
+    setTerminals((prev) => [...prev, { ptyId, title: baseTitle, accent, hasRecentActivity: false }]);
     setFocusedPtyId(ptyId);
     setStatus(`${baseTitle} ready`);
   }
 
-  function launchAgent(agent: Agent) {
-    // Always create a fresh terminal for the agent (unlimited model).
-    const title = `${agent.label} • live`;
-    createNewTerminal(agent.id, title, agent.accent);
-
-    if (!launched.includes(agent.id)) {
-      const next = [...launched, agent.id];
-      setLaunched(next);
-    }
+  function launchAgent(agent: { id: string; label: string; accent: string }) {
+    createNewTerminal(agent.id, `${agent.label} • live`, agent.accent);
+    if (!launched.includes(agent.id)) setLaunched((p) => [...p, agent.id]);
   }
 
   function spawnNewTerminal() {
@@ -92,16 +58,10 @@ export default function VibeforgeShell() {
   }
 
   function closeTerminal(ptyId: string) {
-    // Kill in Rust + remove from list.
     invoke("kill_terminal", { id: ptyId }).catch(() => {});
-
     setTerminals((prev) => {
       const remaining = prev.filter((t) => t.ptyId !== ptyId);
-      // If we closed the focused one, focus the last remaining (or none).
-      if (focusedPtyId === ptyId) {
-        const nextFocused = remaining.length > 0 ? remaining[remaining.length - 1].ptyId : null;
-        setFocusedPtyId(nextFocused);
-      }
+      if (focusedPtyId === ptyId) setFocusedPtyId(remaining.length > 0 ? remaining[remaining.length - 1].ptyId : null);
       return remaining;
     });
     setStatus("Terminal closed");
@@ -109,25 +69,15 @@ export default function VibeforgeShell() {
 
   function focusTerminal(ptyId: string) {
     setFocusedPtyId(ptyId);
-    // Clear activity flag when focusing (user has "seen" it)
-    setTerminals(prev =>
-      prev.map(t => t.ptyId === ptyId ? { ...t, hasRecentActivity: false } : t)
-    );
+    setTerminals((prev) => prev.map((t) => (t.ptyId === ptyId ? { ...t, hasRecentActivity: false } : t)));
   }
 
-  // Minimal send context from FileTree into the currently focused terminal.
   function sendToFocusedTerminal(text: string) {
-    if (!focusedPtyId) {
-      setStatus("No focused terminal to send to");
-      return;
-    }
-    invoke("write_to_terminal", { id: focusedPtyId, data: text + "\n" }).catch((e) => {
-      console.warn("send to focused failed", e);
-    });
+    if (!focusedPtyId) { setStatus("No focused terminal"); return; }
+    invoke("write_to_terminal", { id: focusedPtyId, data: text + "\n" }).catch(() => {});
     setStatus(`Sent to ${focusedPtyId}`);
   }
 
-  // Keyboard support for terminal list: ArrowUp/Down to cycle focus, 1-9 to jump.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (terminals.length === 0) return;
@@ -152,188 +102,196 @@ export default function VibeforgeShell() {
 
   return (
     <div className="vf-root">
-      {/* Top bar — agent launchers + global affordances */}
-      <div className="vf-topbar">
-        <div className="title">VIBEFORGE</div>
+      {/* TopNavBar */}
+      <header className="vf-topbar">
+        <span className="title">VIBEFORGE</span>
 
-        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+        <div className="agent-pills">
           {AGENTS.map((a) => (
             <button
               key={a.id}
-              className={`vf-agent-btn ${a.accent}`}
+              className={`vf-agent-pill ${a.accent}`}
               onClick={() => launchAgent(a)}
-              title={`Launch ${a.label}`}
             >
+              <span className="pill-dot" />
               {a.label}
             </button>
           ))}
         </div>
 
-        <div style={{ flex: 1 }} />
-
-        <input
-          className="vf-input"
-          placeholder="Quick open (files, plans, agents) — stub"
-          style={{ width: 260 }}
-          onFocus={() => setStatus("Command palette will live here (Phase 4)")}
-        />
-
-        <div className="vf-badge" style={{ marginLeft: 8 }}>
-          {launched.length} active
-        </div>
-      </div>
-
-      <div className="vf-main">
-        {/* Left sidebar — live file tree (Phase 1) with structured workflow first-class treatment */}
-        <div className="vf-sidebar">
-          <div className="vf-sidebar-header">CURRENT PROJECT</div>
-          <div style={{ padding: "6px 10px", fontSize: 12, fontWeight: 500, borderBottom: "1px solid var(--vf-border)" }}>
-            vibeforge <span className="vf-badge">main</span>
-          </div>
-
-          <div className="vf-sidebar-header" style={{ marginTop: 4 }}>STRUCTURED WORKFLOW + FILES (live)</div>
-
-          <FileTree
-            onFileOpen={(p) => {
-              setLastTreeContext(p);           // capture for Quick Delegate context injection
-              sendToFocusedTerminal(p);        // keep existing direct-to-focused paste behavior
-            }}
-            onRefresh={() => setStatus("Tree refreshed • real disk")}
-          />
-
-          <div style={{ flex: 1 }} />
-
-          <div style={{ padding: 8, fontSize: 10, color: "var(--vf-muted)", borderTop: "1px solid var(--vf-border)" }}>
-            Real readDir + writeTextFile • structured folders prioritized • quick-create writes .md
-          </div>
+        <div className="search-wrap">
+          <span className="material-symbols-outlined search-icon">search</span>
+          <input className="si" placeholder="Quick open (files, plans, agents) — stub" />
         </div>
 
-        {/* Center — dynamic terminal list + single focused viewer (unlimited terminals) */}
-        <div className="vf-center">
-          <div className="vf-center-header">
-            <span>TERMINALS</span>
-            <span style={{ color: "var(--vf-muted)" }}>• {terminals.length} open • focus one</span>
-            <div style={{ flex: 1 }} />
-            <button className="vf-btn" style={{ fontSize: 11, padding: "3px 8px" }} onClick={spawnNewTerminal}>
-              + New Shell
+        <div className="active-badge">
+          <span className="dot" />
+          {launched.length || 0} active
+        </div>
+
+        <button className="icon-btn"><span className="material-symbols-outlined">settings</span></button>
+        <button className="icon-btn"><span className="material-symbols-outlined">notifications</span></button>
+      </header>
+
+      {/* Main */}
+      <main className="vf-main">
+        {/* Left Sidebar */}
+        <aside className="vf-sidebar">
+          <div className="sidebar-section shrink-0">
+            <div className="sidebar-label">CURRENT PROJECT</div>
+            <div className="sidebar-project">
+              <span className="material-symbols-outlined">folder</span>
+              vibeforge <span className="badge">[main]</span>
+            </div>
+          </div>
+
+          <div className="action-bar">
+            <button className="action-btn"><span className="material-symbols-outlined">add</span> Plan</button>
+            <button className="action-btn"><span className="material-symbols-outlined">add</span> Spec</button>
+            <button className="action-btn"><span className="material-symbols-outlined">add</span> Track</button>
+            <button className="action-icon-btn"><span className="material-symbols-outlined">refresh</span></button>
+          </div>
+
+          <div className="file-tree">
+            <FileTree
+              onFileOpen={(p) => {
+                setLastTreeContext(p);
+                sendToFocusedTerminal(p);
+              }}
+              onRefresh={() => setStatus("Tree refreshed • real disk")}
+            />
+          </div>
+
+          <div className="sidebar-note">
+            Real readDir + writeTextFile • structured folders prioritized
+          </div>
+        </aside>
+
+        {/* Center Terminal Area */}
+        <section className="vf-center">
+          <div className="center-header">
+            <div className="left">
+              <span className="label">TERMINALS</span>
+              <span className="tl1" style={{ color: "var(--outline)" }}>• {terminals.length} open • focus one</span>
+            </div>
+            <button className="new-shell-btn" onClick={spawnNewTerminal}>
+              <span className="material-symbols-outlined">add</span> New Shell
             </button>
           </div>
 
           <div className="terminal-manager">
-            {/* Terminal list (left) - polished */}
+            {/* Terminal List */}
             <div className="terminal-list">
               {terminals.length === 0 && (
-                <div className="empty-hint" style={{ padding: "10px 8px", fontSize: 10, color: "var(--vf-muted)", lineHeight: 1.35 }}>
-                  No terminals open.<br />
-                  Click an agent above or use + New Shell.
+                <div style={{ padding: "10px 12px", fontSize: 10, color: "var(--outline)", lineHeight: 1.35 }}>
+                  No terminals open.<br />Click an agent above or use + New Shell.
                 </div>
               )}
               {terminals.map((t) => {
                 const isFocused = t.ptyId === focusedPtyId;
-                // Simple sub status to match Stitch two-line list items
-                const subStatus = isFocused ? "live" : (t.title.includes("claude") || t.title.includes("codex") || t.title.includes("gemini") ? "ready" : "shell");
+                const subStatus = isFocused ? "Processing index.ts..." : (t.title.includes("live") ? "ready" : "shell");
                 return (
                   <div
                     key={t.ptyId}
-                    className={`terminal-list-item ${isFocused ? "focused" : ""}`}
+                    className={`tli ${isFocused ? "focused" : ""}`}
                     onClick={() => focusTerminal(t.ptyId)}
-                    title={t.title}
                   >
-                    <div className="main">
-                      <span className={`vf-badge ${t.accent}`} style={{ fontSize: 9, marginRight: 6 }}>{t.accent}</span>
-                      {t.hasRecentActivity && !isFocused && (
-                        <span className="activity-dot" title="New output" />
-                      )}
-                      <span className="terminal-title" style={{ fontFamily: "var(--vf-mono, monospace)" }}>{t.title}</span>
-                      <button
-                        className="terminal-close"
-                        onClick={(e) => { e.stopPropagation(); closeTerminal(t.ptyId); }}
-                        title="Close terminal (kill PTY)"
-                      >
-                        ✕
-                      </button>
+                    <div className="row">
+                      <div className="left">
+                        <span className="material-symbols-outlined">{t.accent === "claude" ? "smart_toy" : "terminal"}</span>
+                        <span className="tname">{t.title}</span>
+                      </div>
+                      <span className={`tdot ${isFocused ? "focused" : ""}`} />
                     </div>
-                    <div className="sub">{subStatus}</div>
+                    <div className="tsub">{subStatus}</div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Focused viewer (right / main) */}
+            {/* Terminal Viewer */}
             <div className="terminal-viewer">
               {focusedSession ? (
-                <TerminalPane
-                  ptyId={focusedSession.ptyId}
-                  title={focusedSession.title}
-                  accent={focusedSession.accent}
-                  onData={() => {
-                    if (launched.length > 0) {
-                      setStatus(`input to ${focusedSession.title}`);
-                    }
-                  }}
-                  onClose={() => closeTerminal(focusedSession.ptyId)}
-                  onActivity={(id) => {
-                    // Mark activity on the session (for list indicator). If it's the focused one, no need.
-                    if (id !== focusedPtyId) {
-                      setTerminals(prev =>
-                        prev.map(t => t.ptyId === id ? { ...t, hasRecentActivity: true } : t)
-                      );
-                    }
-                  }}
-                />
+                <>
+                  <div className="viewer-header">
+                    <span className="viewer-badge">Active</span>
+                    <span className="viewer-name">{focusedSession.title}</span>
+                  </div>
+                  <TerminalPane
+                    ptyId={focusedSession.ptyId}
+                    title={focusedSession.title}
+                    accent={focusedSession.accent}
+                    onData={() => {}}
+                    onClose={() => closeTerminal(focusedSession.ptyId)}
+                    onActivity={(id) => {
+                      if (id !== focusedPtyId) {
+                        setTerminals((prev) =>
+                          prev.map((t) => (t.ptyId === id ? { ...t, hasRecentActivity: true } : t))
+                        );
+                      }
+                    }}
+                  />
+                </>
               ) : (
-                <div style={{ padding: 20, color: "var(--vf-muted)", fontSize: 12 }}>
-                  Select or create a terminal from the list on the left.
+                <div className="terminal-body">
+                  <div className="muted"># Initialization...</div>
+                  <div><span className="tertiary">agent</span> <span className="primary">--model</span> claude-3.5-sonnet <span className="primary">--context</span> AGENT.md</div>
+                  <div className="iblock">
+                    Loading structured context...<br />
+                    [OK] Read plan/current.md<br />
+                    [OK] Read spec/architecture.md<br />
+                    Ready.
+                  </div>
+                  <div><span className="tertiary">➜</span> <span className="on-surface">Select or create a terminal above to begin.</span></div>
+                  <div className="muted" style={{ marginTop: 8 }}>Waiting for input...</div>
+                  <div style={{ marginTop: 4 }}><span className="cursor-pulse" /></div>
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Right panels — context tools (browser/http/diff stubs) */}
-        <div className={`vf-right ${rightCollapsed ? 'collapsed' : ''}`}>
+        {/* Right Panel */}
+        <aside className={`vf-right ${rightCollapsed ? "collapsed" : ""}`}>
           <div
-            className="vf-panel-header"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+            className="right-header"
+            style={{ cursor: "pointer" }}
             onClick={() => setRightCollapsed(!rightCollapsed)}
-            title={rightCollapsed ? "Expand context panel" : "Collapse context panel for terminal focus"}
           >
-            <span>CONTEXT • SEND TO AGENT</span>
-            <span style={{ fontSize: 10, color: 'var(--vf-muted)' }}>
-              {rightCollapsed ? '◀' : '▶'}
-            </span>
+            <span className="label">CONTEXT • SEND TO AGENT</span>
+            <button className="icon-btn" style={{ width: 20, height: 20 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                {rightCollapsed ? "expand_content" : "collapse_content"}
+              </span>
+            </button>
           </div>
 
           {!rightCollapsed && (
-            <>
-              <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
-                <span>🌐 Browser Stub</span>
-                <span>›</span>
+            <div className="right-content">
+              <button className="context-stub">
+                <span className="left"><span className="material-symbols-outlined">language</span> Browser Stub</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
+              </button>
+              <button className="context-stub">
+                <span className="left"><span className="material-symbols-outlined">api</span> HTTP Stub</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
+              </button>
+              <button className="context-stub">
+                <span className="left"><span className="material-symbols-outlined">difference</span> AI Diff Review</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
               </button>
 
-              <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
-                <span>🔌 HTTP Stub</span>
-                <span>›</span>
-              </button>
+              {/* Quick Delegate */}
+              <div className="quick-delegate">
+                <div className="qd-label">Quick Delegate</div>
 
-              <button className="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
-                <span>📊 AI Diff Review</span>
-                <span>›</span>
-              </button>
-
-              {/* Quick Delegate — styled closer to Stitch mock for better polish and UX */}
-              <div className="vf-context-item" style={{ borderTop: "1px solid var(--vf-border)", paddingTop: 8 }}>
-                <div className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold mb-xs">Quick Delegate</div>
-
-                {/* Target selector: allow choosing any open terminal, not just focused */}
                 {terminals.length > 0 && (
-                  <div style={{ marginBottom: 4 }}>
-                    <div style={{ fontSize: 9, color: "var(--vf-muted)", marginBottom: 2 }}>Target terminal</div>
+                  <>
+                    <div className="qd-field-label">Target terminal</div>
                     <select
                       value={delegateTargetId || focusedPtyId || ""}
                       onChange={(e) => setDelegateTargetId(e.target.value || null)}
-                      className="vf-input"
-                      style={{ width: "100%", fontSize: 10, padding: "2px 4px" }}
+                      className="qd-select"
                     >
                       {terminals.map((t) => (
                         <option key={t.ptyId} value={t.ptyId}>
@@ -341,21 +299,20 @@ export default function VibeforgeShell() {
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </>
                 )}
 
                 <textarea
                   value={delegatePrompt}
                   onChange={(e) => setDelegatePrompt(e.target.value)}
-                  placeholder="Describe the task for the agent..."
-                  style={{ width: "100%", minHeight: 48, fontSize: 11, background: "var(--vf-surface)", border: "1px solid var(--vf-border)", color: "var(--vf-text)", padding: 4, borderRadius: 3 }}
+                  className="qd-textarea"
+                  placeholder="Describe the task..."
                 />
 
-                {/* Context injection from FileTree (last clicked file/dir) */}
                 {lastTreeContext && (
                   <button
-                    className="vf-btn"
-                    style={{ fontSize: 9, padding: "1px 4px", marginTop: 3 }}
+                    className="qd-row-btn"
+                    style={{ marginBottom: 4, fontSize: 9, padding: "1px 4px" }}
                     onClick={() => {
                       const ctx = `\n\n[context from tree]\n${lastTreeContext}`;
                       setDelegatePrompt((p) => (p.trim() ? p + ctx : ctx.trim()));
@@ -365,126 +322,100 @@ export default function VibeforgeShell() {
                   </button>
                 )}
 
-                <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
-                  <button
-                    className="vf-btn"
-                    style={{ fontSize: 10, padding: "2px 6px", flex: 1 }}
-                    disabled={!(delegateTargetId || focusedPtyId) || !delegatePrompt.trim()}
-                    onClick={async () => {
-                      const target = delegateTargetId || focusedPtyId;
-                      if (!target) return;
-                      const taskMsg = `Task:\n${delegatePrompt.trim()}\n\nPlease complete this task. Use any provided context.`;
-                      try {
-                        await invoke("write_to_terminal", { id: target, data: taskMsg + "\n" });
-                        setStatus(`Task sent to ${target}`);
-                        setDelegatePrompt("");
-                        setLastCaptured(""); // clear previous capture when sending new work
-                      } catch (e: any) {
-                        setStatus(`Delegate failed: ${e}`);
-                      }
-                    }}
-                  >
-                    Send task to target
-                  </button>
-                  <button
-                    className="vf-btn"
-                    style={{ fontSize: 10, padding: "2px 6px" }}
-                    onClick={async () => {
-                      // Demo the improved strip using realistic multi-line output (with trailing garbage after stop message).
-                      // This matches real Claude Code sessions.
-                      const sample = `Đây là phân tích lỗi...
-   Tôi đã kiểm tra file A và B.
-   Kết luận: cần sửa logic X.
+                <button
+                  className="qd-send-btn"
+                  disabled={!(delegateTargetId || focusedPtyId) || !delegatePrompt.trim()}
+                  onClick={async () => {
+                    const target = delegateTargetId || focusedPtyId;
+                    if (!target) return;
+                    const taskMsg = `Task:\n${delegatePrompt.trim()}\n\nPlease complete this task. Use any provided context.`;
+                    try {
+                      await invoke("write_to_terminal", { id: target, data: taskMsg + "\n" });
+                      setStatus(`Task sent to ${target}`);
+                      setDelegatePrompt("");
+                    } catch {
+                      setStatus("Delegate failed");
+                    }
+                  }}
+                >
+                  Send task to target
+                </button>
 
-   Claude Code has stopped
-   Một số dòng rác sau này không được xuất hiện`;
-                      try {
-                        const cleaned: string = await invoke("strip_claude_stop_messages", { output: sample });
-                        setStatus(`Strip demo: ${cleaned}`);
-                      } catch (e: any) {
-                        setStatus(`Strip failed: ${e}`);
-                      }
-                    }}
-                  >
+                <div className="qd-row">
+                  <button className="qd-row-btn" onClick={async () => {
+                    const sample = `Đây là phân tích lỗi...\n   Tôi đã kiểm tra file A và B.\n   Kết luận: cần sửa logic X.\n\n   Claude Code has stopped\n   Một số dòng rác sau này không được xuất hiện`;
+                    try {
+                      const cleaned: string = await invoke("strip_claude_stop_messages", { output: sample });
+                      setStatus(`Strip demo: ${cleaned}`);
+                    } catch { setStatus("Strip failed"); }
+                  }}>
                     Demo strip
                   </button>
-                  <button
-                    className="vf-btn"
-                    style={{ fontSize: 10, padding: "2px 6px" }}
-                    disabled={!(delegateTargetId || focusedPtyId)}
-                    onClick={async () => {
-                      const target = delegateTargetId || focusedPtyId;
-                      if (!target) return;
-                      try {
-                        const raw: string = await invoke("get_terminal_output", { id: target });
-                        const cleaned: string = await invoke("strip_claude_stop_messages", { output: raw });
-                        setLastCaptured(cleaned);
-                        setStatus(`Captured ${raw.length} chars → stripped to ${cleaned.length} (from ${target})`);
-                      } catch (e: any) {
-                        setStatus(`Capture failed: ${e}`);
-                      }
-                    }}
-                  >
-                    Capture last + strip
+                  <button className="qd-row-btn" disabled={!(delegateTargetId || focusedPtyId)} onClick={async () => {
+                    const target = delegateTargetId || focusedPtyId;
+                    if (!target) return;
+                    try {
+                      const raw: string = await invoke("get_terminal_output", { id: target });
+                      const cleaned: string = await invoke("strip_claude_stop_messages", { output: raw });
+                      setLastCaptured(cleaned);
+                      setStatus(`Captured ${raw.length} chars → stripped to ${cleaned.length}`);
+                    } catch { setStatus("Capture failed"); }
+                  }}>
+                    Capture + strip
                   </button>
                 </div>
 
-                {/* Small result area for the last captured+stripped output (foundation for review / re-use) */}
                 {lastCaptured && (
-                  <div style={{ marginTop: 6 }}>
-                    <div style={{ fontSize: 9, color: "var(--vf-muted)", marginBottom: 2 }}>
-                      Last captured + stripped:
-                    </div>
+                  <div className="captured-area">
+                    <div className="captured-label">Last captured + stripped</div>
                     <textarea
                       readOnly
                       value={lastCaptured}
-                      style={{
-                        width: "100%",
-                        minHeight: 52,
-                        fontSize: 9,
-                        background: "var(--vf-surface)",
-                        border: "1px solid var(--vf-border)",
-                        color: "var(--vf-text)",
-                        padding: 4,
-                        borderRadius: 3,
-                        fontFamily: "var(--vf-mono, monospace)",
-                      }}
+                      className="captured-textarea"
                     />
-                    <button
-                      className="vf-btn"
-                      style={{ fontSize: 9, padding: "1px 4px", marginTop: 2 }}
-                      onClick={() => {
-                        navigator.clipboard?.writeText(lastCaptured).catch(() => {});
-                        setStatus("Copied captured output to clipboard");
-                      }}
-                    >
-                      Copy
-                    </button>
                   </div>
                 )}
-
-                <div style={{ fontSize: 9, color: "var(--vf-muted)", marginTop: 2 }}>
-                  Choose target • insert tree context • Capture last output then strip. All via existing PTY surface.
-                </div>
               </div>
 
               <div style={{ flex: 1 }} />
 
-              <div style={{ padding: 10, fontSize: 10, color: "var(--vf-muted)", borderTop: "1px solid var(--vf-border)" }}>
-                Drag files / terminal output / browser here to send context (future). Orchestration foundation active.
+              <div className="drag-area">
+                <span className="drag-text">
+                  <span className="material-symbols-outlined">upload_file</span>
+                  Drag files / output here
+                </span>
               </div>
-            </>
+            </div>
           )}
-        </div>
-      </div>
+        </aside>
+      </main>
 
-      {/* Status bar */}
-      <div className="vf-statusbar">
-        <span>{status}</span>
-        <span className="vf-badge">plan/spec/track</span>
-        <span style={{ marginLeft: "auto", fontSize: 10 }}>Windows • portable • real PTY (Phase 2)</span>
-      </div>
+      {/* Statusbar */}
+      <footer className="vf-statusbar">
+        <div className="status-left">
+          <span className="status-item">
+            <span className="material-symbols-outlined">check_circle</span>
+            {status}
+          </span>
+          <div className="status-badges">
+            <span className="status-badge">plan</span>
+            <span className="status-badge">spec</span>
+            <span className="status-badge">track</span>
+          </div>
+        </div>
+        <div className="status-right">
+          <span>Windows x64</span>
+          <span className="status-divider" />
+          <span>Portable Runtime</span>
+          <span className="status-divider" />
+          <span className="status-item">
+            <span className="green-dot" />
+            Real PTY
+          </span>
+          <span className="status-divider" />
+          <span>VIBEFORGE v2.4.1</span>
+        </div>
+      </footer>
     </div>
   );
 }
-
