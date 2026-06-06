@@ -798,8 +798,9 @@ All strictly per AGENT.md. Small steps, security considered, design direction re
 
 **Git:**
 - Branch: plan/vibeforge-phase2-terminals-pty-2025-06-09 (all work here).
-- First push for docs: 7929cce (plan evolution + this track start).
-- Code refactor + new orchestration sub-plan + final track update: next commit(s) + push (regular as requested).
+- Docs push: 7929cce.
+- Major refactor + orchestration sub-plan + track: 066126d (pushed).
+- Record push SHA in track (this small follow-up commit).
 
 **Next immediate (in this session):**
 - Complete the dynamic list + single focus implementation (core of "1").
