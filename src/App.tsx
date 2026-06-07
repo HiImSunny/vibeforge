@@ -103,7 +103,7 @@ export default function VibeforgeShell() {
   return (
     <div className="vf-root">
       {/* TopNavBar */}
-      <header className="vf-topbar">
+      <header className="vf-topbar" aria-label="Vibeforge workspace navigation">
         <span className="title">VIBEFORGE</span>
 
         <div className="agent-pills">
@@ -112,6 +112,8 @@ export default function VibeforgeShell() {
               key={a.id}
               className={`vf-agent-pill ${a.accent}`}
               onClick={() => launchAgent(a)}
+              aria-label={`Launch ${a.label} terminal`}
+              title={`Launch ${a.label} terminal`}
             >
               <span className="pill-dot" />
               {a.label}
@@ -121,7 +123,7 @@ export default function VibeforgeShell() {
 
         <div className="search-wrap">
           <span className="material-symbols-outlined search-icon">search</span>
-          <input className="si" placeholder="Quick open (files, plans, agents) — stub" />
+          <input className="si" placeholder="Quick open: files, plans, agents" aria-label="Quick open files, plans, and agents" />
         </div>
 
         <div className="active-badge">
@@ -129,14 +131,14 @@ export default function VibeforgeShell() {
           {launched.length || 0} active
         </div>
 
-        <button className="icon-btn"><span className="material-symbols-outlined">settings</span></button>
-        <button className="icon-btn"><span className="material-symbols-outlined">notifications</span></button>
+        <button className="icon-btn" aria-label="Open settings" title="Open settings"><span className="material-symbols-outlined">settings</span></button>
+        <button className="icon-btn" aria-label="Open notifications" title="Open notifications"><span className="material-symbols-outlined">notifications</span></button>
       </header>
 
       {/* Main */}
       <main className="vf-main">
         {/* Left Sidebar */}
-        <aside className="vf-sidebar">
+        <aside className="vf-sidebar" aria-label="Project files and structured workflow">
           <div className="sidebar-section shrink-0">
             <div className="sidebar-label">CURRENT PROJECT</div>
             <div className="sidebar-project">
@@ -146,10 +148,10 @@ export default function VibeforgeShell() {
           </div>
 
           <div className="action-bar">
-            <button className="action-btn"><span className="material-symbols-outlined">add</span> Plan</button>
-            <button className="action-btn"><span className="material-symbols-outlined">add</span> Spec</button>
-            <button className="action-btn"><span className="material-symbols-outlined">add</span> Track</button>
-            <button className="action-icon-btn"><span className="material-symbols-outlined">refresh</span></button>
+            <button className="action-btn" aria-label="Create plan"><span className="material-symbols-outlined">add</span> Plan</button>
+            <button className="action-btn" aria-label="Create spec"><span className="material-symbols-outlined">add</span> Spec</button>
+            <button className="action-btn" aria-label="Create track"><span className="material-symbols-outlined">add</span> Track</button>
+            <button className="action-icon-btn" aria-label="Refresh project files" title="Refresh project files"><span className="material-symbols-outlined">refresh</span></button>
           </div>
 
           <div className="file-tree">
@@ -174,7 +176,7 @@ export default function VibeforgeShell() {
               <span className="label">TERMINALS</span>
               <span className="tl1" style={{ color: "var(--outline)" }}>• {terminals.length} open • focus one</span>
             </div>
-            <button className="new-shell-btn" onClick={spawnNewTerminal}>
+            <button className="new-shell-btn" onClick={spawnNewTerminal} aria-label="Create new shell terminal">
               <span className="material-symbols-outlined">add</span> New Shell
             </button>
           </div>
@@ -191,10 +193,13 @@ export default function VibeforgeShell() {
                 const isFocused = t.ptyId === focusedPtyId;
                 const subStatus = isFocused ? "Processing index.ts..." : (t.title.includes("live") ? "ready" : "shell");
                 return (
-                  <div
+                  <button
                     key={t.ptyId}
+                    type="button"
                     className={`tli ${isFocused ? "focused" : ""}`}
                     onClick={() => focusTerminal(t.ptyId)}
+                    aria-pressed={isFocused}
+                    aria-label={`Focus ${t.title} terminal`}
                   >
                     <div className="row">
                       <div className="left">
@@ -204,7 +209,7 @@ export default function VibeforgeShell() {
                       <span className={`tdot ${isFocused ? "focused" : ""}`} />
                     </div>
                     <div className="tsub">{subStatus}</div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -252,14 +257,14 @@ export default function VibeforgeShell() {
         </section>
 
         {/* Right Panel */}
-        <aside className={`vf-right ${rightCollapsed ? "collapsed" : ""}`}>
+        <aside className={`vf-right ${rightCollapsed ? "collapsed" : ""}`} aria-label="Agent context panel">
           <div
             className="right-header"
             style={{ cursor: "pointer" }}
             onClick={() => setRightCollapsed(!rightCollapsed)}
           >
             <span className="label">CONTEXT • SEND TO AGENT</span>
-            <button className="icon-btn" style={{ width: 20, height: 20 }}>
+            <button className="icon-btn" style={{ width: 20, height: 20 }} aria-label={rightCollapsed ? "Expand context panel" : "Collapse context panel"}>
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                 {rightCollapsed ? "expand_content" : "collapse_content"}
               </span>
@@ -268,15 +273,15 @@ export default function VibeforgeShell() {
 
           {!rightCollapsed && (
             <div className="right-content">
-              <button className="context-stub">
+              <button className="context-stub" aria-label="Open browser stub">
                 <span className="left"><span className="material-symbols-outlined">language</span> Browser Stub</span>
                 <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
               </button>
-              <button className="context-stub">
+              <button className="context-stub" aria-label="Open HTTP stub">
                 <span className="left"><span className="material-symbols-outlined">api</span> HTTP Stub</span>
                 <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
               </button>
-              <button className="context-stub">
+              <button className="context-stub" aria-label="Open AI diff review">
                 <span className="left"><span className="material-symbols-outlined">difference</span> AI Diff Review</span>
                 <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
               </button>
@@ -306,7 +311,8 @@ export default function VibeforgeShell() {
                   value={delegatePrompt}
                   onChange={(e) => setDelegatePrompt(e.target.value)}
                   className="qd-textarea"
-                  placeholder="Describe the task..."
+                  placeholder="Describe the task"
+                  aria-label="Task prompt for selected terminal"
                 />
 
                 {lastTreeContext && (

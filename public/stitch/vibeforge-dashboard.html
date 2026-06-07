@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VIBEFORGE Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#002109",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#2c0051",
+                        "surface-variant": "#333539",
+                        "tertiary": "#4ae176",
+                        "error-container": "#93000a",
+                        "outline": "#8c909f",
+                        "surface-container-lowest": "#0c0e12",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-secondary": "#490080",
+                        "surface-container-highest": "#333539",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#1a1c20",
+                        "on-tertiary-container": "#003111",
+                        "primary-fixed": "#d8e2ff",
+                        "primary": "#adc6ff",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-background": "#e2e2e8",
+                        "inverse-primary": "#005ac2",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface-bright": "#37393e",
+                        "surface-container": "#1e2024",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary": "#002e6a",
+                        "on-primary-container": "#00285d",
+                        "inverse-surface": "#e2e2e8",
+                        "secondary-fixed-dim": "#ddb7ff",
+                        "secondary-fixed": "#f0dbff",
+                        "inverse-on-surface": "#2f3035",
+                        "surface-dim": "#111318",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#ddb7ff",
+                        "on-tertiary": "#003915",
+                        "outline-variant": "#424754",
+                        "on-surface": "#e2e2e8",
+                        "secondary-container": "#6f00be",
+                        "on-surface-variant": "#c2c6d6",
+                        "primary-container": "#4d8eff",
+                        "surface": "#111318",
+                        "on-secondary-fixed-variant": "#6900b3",
+                        "tertiary-container": "#00a74b",
+                        "on-secondary-container": "#d6a9ff",
+                        "surface-tint": "#adc6ff",
+                        "surface-container-high": "#282a2e",
+                        "background": "#111318"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "2px",
+                        "gutter": "1px",
+                        "lg": "20px",
+                        "base": "4px",
+                        "md": "12px",
+                        "sm": "8px",
+                        "hit-area": "36px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-sm": ["JetBrains Mono"],
+                        "label-md": ["JetBrains Mono"],
+                        "headline-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "code-block": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "code-block": ["12px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0a0c10;
+        }
+        /* Custom scrollbar for technical look */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333539; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #424754; }
+        
+        /* Utility class to simulate 1px border grid without generic class clashes */
+        .border-grid { border-color: #1f242c; border-style: solid; border-width: 1px; }
+        .border-r-grid { border-right-color: #1f242c; border-right-style: solid; border-right-width: 1px; }
+        .border-b-grid { border-bottom-color: #1f242c; border-bottom-style: solid; border-bottom-width: 1px; }
+        .border-l-grid { border-left-color: #1f242c; border-left-style: solid; border-left-width: 1px; }
+        .border-t-grid { border-top-color: #1f242c; border-top-style: solid; border-top-width: 1px; }
+    </style>
+</head>
+<body class="h-screen w-full flex flex-col text-on-surface font-body-sm overflow-hidden bg-[#0a0c10]">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-md sticky top-0 z-50 bg-surface border-b-grid h-[42px] shrink-0">
+<div class="flex items-center gap-md">
+<span class="text-headline-sm font-headline-sm font-bold tracking-tight text-on-surface">VIBEFORGE</span>
+<div class="flex gap-sm items-center ml-sm">
+<!-- Claude Active Pill -->
+<button class="px-sm py-xs border-grid border-b-2 border-b-primary bg-surface-container-high text-primary rounded font-label-sm text-label-sm hover:bg-surface-container-high transition-colors opacity-80 flex items-center gap-xs">
+<span class="w-[6px] h-[6px] rounded-full bg-primary inline-block"></span>
+                    Claude
+                </button>
+<button class="px-sm py-xs border-grid border-b-2 border-b-secondary text-on-surface-variant rounded font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-xs">
+                    Codex
+                </button>
+<button class="px-sm py-xs border-grid border-b-2 border-b-tertiary text-on-surface-variant rounded font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-xs">
+                    Gemini
+                </button>
+<button class="px-sm py-xs border-grid border-b-2 border-b-outline text-on-surface-variant rounded font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-xs">
+                    Aider
+                </button>
+</div>
+</div>
+<div class="flex-1 flex justify-center max-w-[260px]">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-[14px] text-outline">search</span>
+<input class="w-full bg-[#111318] border-grid rounded h-6 pl-6 pr-sm text-label-sm font-label-sm text-on-surface placeholder:text-outline focus:border-outline-variant focus:ring-0 focus:outline-none" placeholder="Quick open (files, plans, agents) — stub" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<div class="px-sm py-xs bg-surface-container border-grid rounded font-label-sm text-label-sm text-outline flex items-center gap-xs">
+<span class="w-[6px] h-[6px] rounded-full bg-tertiary inline-block shadow-[0_0_4px_#4ae176]"></span>
+                3 active
+            </div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center w-hit-area h-hit-area" data-icon="settings">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center w-hit-area h-hit-area" data-icon="notifications">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-row overflow-hidden min-h-0 bg-[#0a0c10]">
+<!-- Left Sidebar -->
+<aside class="w-[220px] shrink-0 bg-surface-dim border-r-grid flex flex-col h-full">
+<div class="px-md py-sm border-b-grid shrink-0">
+<div class="text-[10px] text-outline tracking-wider font-semibold uppercase mb-xs">CURRENT PROJECT</div>
+<div class="font-label-md text-label-md text-on-surface flex items-center gap-xs truncate">
+<span class="material-symbols-outlined text-[14px] text-outline">folder</span>
+                    vibeforge <span class="text-outline">[main]</span>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex p-sm gap-xs border-b-grid shrink-0">
+<button class="flex-1 bg-surface border-grid py-1 rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">add</span> Plan
+                </button>
+<button class="flex-1 bg-surface border-grid py-1 rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">add</span> Spec
+                </button>
+<button class="flex-1 bg-surface border-grid py-1 rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">add</span> Track
+                </button>
+<button class="w-[24px] bg-surface border-grid rounded text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">refresh</span>
+</button>
+</div>
+<!-- File Tree -->
+<div class="flex-1 overflow-y-auto py-sm px-xs space-y-1">
+<!-- Highlighted Folders -->
+<div class="flex items-center px-sm py-1 rounded hover:bg-surface-container-high cursor-pointer text-body-sm font-body-sm text-on-surface group">
+<span class="material-symbols-outlined text-[16px] text-primary mr-sm transition-transform group-hover:rotate-90">folder_open</span>
+<span>plan/</span>
+</div>
+<div class="flex items-center px-sm py-1 rounded hover:bg-surface-container-high cursor-pointer text-body-sm font-body-sm text-on-surface group">
+<span class="material-symbols-outlined text-[16px] text-secondary mr-sm transition-transform group-hover:rotate-90">folder_open</span>
+<span>spec/</span>
+</div>
+<div class="flex items-center px-sm py-1 rounded hover:bg-surface-container-high cursor-pointer text-body-sm font-body-sm text-on-surface group">
+<span class="material-symbols-outlined text-[16px] text-tertiary mr-sm transition-transform group-hover:rotate-90">folder_open</span>
+<span>track/</span>
+</div>
+<div class="pl-md">
+<!-- Standard files -->
+<div class="flex items-center px-sm py-1 rounded hover:bg-surface-container-high cursor-pointer text-body-sm font-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-outline mr-sm">description</span>
+<span class="truncate">src/main.rs</span>
+</div>
+<div class="flex items-center px-sm py-1 rounded hover:bg-surface-container-high cursor-pointer text-body-sm font-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-outline mr-sm">description</span>
+<span class="truncate">Cargo.toml</span>
+</div>
+<!-- Highlighted File with Badge -->
+<div class="flex items-center justify-between px-sm py-1 rounded bg-surface-container border-grid mt-1 cursor-pointer">
+<div class="flex items-center text-body-sm font-body-sm text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary mr-sm">terminal</span>
+<span class="font-semibold">AGENT.md</span>
+</div>
+<span class="px-1 bg-surface-bright text-outline text-[9px] uppercase tracking-wider rounded border-grid">structured</span>
+</div>
+</div>
+</div>
+<!-- Bottom Note -->
+<div class="p-sm border-t-grid shrink-0 bg-surface text-outline text-label-sm font-label-sm italic text-center">
+                Real readDir + writeTextFile • structured folders prioritized
+            </div>
+</aside>
+<!-- Center Terminal Area -->
+<section class="flex-1 flex flex-col min-w-0 bg-[#0a0c10]">
+<!-- Terminal Header -->
+<div class="h-[32px] shrink-0 border-b-grid flex items-center justify-between px-md bg-surface">
+<div class="text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">
+                    TERMINALS • 2 open • focus one
+                </div>
+<button class="flex items-center gap-xs px-sm py-xs bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[14px]">add</span> New Shell
+                </button>
+</div>
+<!-- Terminal Sub-layout -->
+<div class="flex-1 flex flex-row min-h-0">
+<!-- Terminal List -->
+<div class="w-[210px] shrink-0 border-r-grid bg-surface flex flex-col">
+<!-- Focused Session -->
+<div class="px-md py-sm border-b-grid border-l-2 border-l-primary bg-surface-container-high cursor-pointer">
+<div class="flex items-center justify-between mb-xs">
+<div class="flex items-center gap-xs font-label-md text-label-md text-primary">
+<span class="material-symbols-outlined text-[14px]">smart_toy</span>
+                                claude-session
+                            </div>
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_4px_#adc6ff]"></span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant truncate text-[11px]">
+                            Processing index.ts...
+                        </div>
+</div>
+<!-- Unfocused Session -->
+<div class="px-md py-sm border-b-grid cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between mb-xs">
+<div class="flex items-center gap-xs font-label-md text-label-md text-on-surface">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+                                local-shell
+                            </div>
+<span class="w-[6px] h-[6px] rounded-full bg-outline"></span>
+</div>
+<div class="text-body-sm font-body-sm text-outline truncate text-[11px]">
+                            cargo run --release
+                        </div>
+</div>
+</div>
+<!-- Terminal Viewer -->
+<div class="flex-1 flex flex-col min-w-0 bg-[#0a0c10]">
+<!-- Viewer Header -->
+<div class="h-6 shrink-0 border-b-grid flex items-center px-md bg-surface-container gap-sm">
+<span class="px-xs bg-primary-container text-on-primary-container text-[10px] rounded border-grid uppercase font-bold tracking-wider">Active</span>
+<span class="font-label-md text-label-md text-on-surface">claude-session-01</span>
+</div>
+<!-- Terminal Body -->
+<div class="flex-1 overflow-auto p-md font-code-block text-code-block text-on-surface-variant space-y-2">
+<div class="text-outline"># Initialization...</div>
+<div><span class="text-tertiary">agent</span> <span class="text-primary">--model</span> claude-3.5-sonnet <span class="text-primary">--context</span> AGENT.md</div>
+<div class="pl-md border-l border-outline-variant py-sm my-sm text-[#c2c6d6]">
+                            Loading structured context...<br/>
+                            [OK] Read plan/current.md<br/>
+                            [OK] Read spec/architecture.md<br/>
+                            Ready.
+                        </div>
+<div><span class="text-tertiary">➜</span> <span class="text-on-surface">Analyzing request: "Implement drag and drop for terminal output"</span></div>
+<div class="text-outline">Thinking...</div>
+<div class="text-on-surface">I'll modify `src/ui/components.rs` to add standard HTML5 drag event listeners to the terminal pane.</div>
+<div class="mt-4"><span class="animate-pulse inline-block w-2 h-4 bg-primary align-middle"></span></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Panel -->
+<aside class="w-[240px] shrink-0 border-l-grid bg-surface-dim flex flex-col h-full">
+<div class="h-[32px] shrink-0 border-b-grid flex items-center justify-between px-md bg-surface">
+<div class="text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">
+                    CONTEXT • SEND TO AGENT
+                </div>
+<button class="text-outline hover:text-on-surface transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">collapse_content</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-sm space-y-sm">
+<!-- Stubs Section -->
+<div class="space-y-xs">
+<button class="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">language</span> Browser Stub</span>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+</button>
+<button class="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">api</span> HTTP Stub</span>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+</button>
+<button class="w-full text-left px-sm py-1 bg-surface border-grid rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container flex items-center justify-between">
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">difference</span> AI Diff Review</span>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+</button>
+</div>
+<!-- Quick Delegate -->
+<div class="mt-md p-sm bg-surface-container-low border-grid rounded">
+<div class="text-[10px] text-outline uppercase tracking-wider font-semibold mb-xs">Quick Delegate</div>
+<label class="block text-[11px] text-on-surface-variant mb-1">Target terminal</label>
+<select class="w-full bg-[#111318] border-grid rounded px-sm py-1 text-label-sm font-label-sm text-primary mb-sm focus:border-outline-variant focus:ring-0">
+<option>Claude-session-01 (focused)</option>
+<option>local-shell</option>
+</select>
+<textarea class="w-full h-20 bg-[#111318] border-grid rounded p-sm text-body-sm font-body-sm text-on-surface placeholder:text-outline mb-sm focus:border-outline-variant focus:ring-0 resize-none" placeholder="Describe the task..."></textarea>
+<div class="space-y-xs">
+<button class="w-full bg-primary text-on-primary py-1 rounded text-label-sm font-label-sm font-bold hover:opacity-90 transition-opacity">
+                            Send task to target
+                        </button>
+<div class="flex gap-xs">
+<button class="flex-1 bg-surface border-grid py-1 rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container">
+                                Demo strip
+                            </button>
+<button class="flex-1 bg-surface border-grid py-1 rounded text-label-sm font-label-sm text-on-surface hover:bg-surface-container">
+                                Capture + strip
+                            </button>
+</div>
+</div>
+</div>
+<!-- Result area -->
+<div class="mt-sm">
+<div class="text-[10px] text-outline uppercase tracking-wider font-semibold mb-xs">Last captured + stripped</div>
+<div class="w-full h-16 bg-[#0a0c10] border-grid rounded p-sm text-code-block font-code-block text-outline text-[10px] overflow-auto select-all cursor-text">
+// No capture yet...
+                    </div>
+</div>
+</div>
+<!-- Footer Drag area -->
+<div class="p-sm border-t-grid shrink-0 bg-surface-container-low flex items-center justify-center border-dashed border-[#424754] m-sm rounded h-16 opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="text-label-sm font-label-sm text-outline text-center flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">upload_file</span>
+                    Drag files / output here
+                </span>
+</div>
+</aside>
+</main>
+<!-- Footer / Statusbar -->
+<footer class="h-[24px] shrink-0 border-t-grid bg-surface-container-lowest flex justify-between items-center px-md w-full z-50">
+<div class="flex items-center gap-md">
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[12px] text-tertiary">check_circle</span>
+                Task sent to t-claude-01
+            </span>
+<div class="flex gap-xs">
+<span class="px-xs bg-surface border-grid rounded text-[9px] text-outline uppercase">plan</span>
+<span class="px-xs bg-surface border-grid rounded text-[9px] text-outline uppercase">spec</span>
+<span class="px-xs bg-surface border-grid rounded text-[9px] text-outline uppercase">track</span>
+</div>
+</div>
+<div class="text-label-sm font-label-sm text-outline flex items-center gap-sm">
+<span>Windows x64</span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span>Portable Runtime</span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span class="flex items-center gap-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                Real PTY
+            </span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span>VIBEFORGE v2.4.1</span>
+</div>
+</footer>
+</body></html>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { readDir, DirEntry, writeTextFile } from "@tauri-apps/plugin-fs";
+import { invoke } from "@tauri-apps/api/core";
 
 /**
  * Simple recursive file tree for Phase 1.
@@ -60,25 +61,26 @@ async function loadChildren(path: string): Promise<TreeNode[]> {
   }
 }
 
-async function createStructuredEntry(folder: "plan" | "spec" | "track", title: string) {
+async function createStructuredEntry(folder: "plan" | "spec" | "track", title: string, basePath: string) {
   const ts = new Date().toISOString().slice(0, 10);
   const safe = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-");
-  const filename = `${folder}/${ts}-${safe || "new-entry"}.md`;
+  const filename = `${basePath}/${folder}/${ts}-${safe || "new-entry"}.md`;
   const content = `# ${title}\n\n**Date:** ${ts}\n**Status:** TODO\n\n(Generated from Vibeforge Phase 1 quick-create)\n\n## Goal\n\n## Scope\n\n## Approach\n\n`;
   await writeTextFile(filename, content);
   return filename;
 }
 
 export default function FileTree({ onFileOpen, onRefresh }: { onFileOpen?: (path: string) => void; onRefresh?: () => void }) {
-  const [root] = useState("."); // start at project root (the vibeforge app itself)
+  const [root, setRoot] = useState("."); // updated from Rust get_project_dir on mount
   const [nodes, setNodes] = useState<TreeNode[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["plan", "spec", "track"]));
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function refresh() {
+  async function refresh(pathOverride?: string) {
+    const target = pathOverride ?? root;
     setLoading(true);
-    const children = await loadChildren(root);
+    const children = await loadChildren(target);
     setNodes(children);
     setLoading(false);
     setMessage(null);
@@ -86,7 +88,17 @@ export default function FileTree({ onFileOpen, onRefresh }: { onFileOpen?: (path
   }
 
   useEffect(() => {
-    refresh();
+    // Get the project root from Rust so readDir resolves correctly
+    invoke<string>("get_project_dir")
+      .then((dir) => {
+        setRoot(dir);
+        return loadChildren(dir);
+      })
+      .then(setNodes)
+      .catch(() => {
+        // Fallback to default "." path
+        loadChildren(root).then(setNodes);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -108,7 +120,7 @@ export default function FileTree({ onFileOpen, onRefresh }: { onFileOpen?: (path
 
   async function handleQuickCreate(folder: "plan" | "spec" | "track") {
     try {
-      const created = await createStructuredEntry(folder, `new-${folder}-entry`);
+      const created = await createStructuredEntry(folder, `new-${folder}-entry`, root);
       setMessage(`Created ${created}`);
       await refresh();
       // auto expand the folder
@@ -167,7 +179,7 @@ export default function FileTree({ onFileOpen, onRefresh }: { onFileOpen?: (path
         <button className="vf-btn" style={{ fontSize: 10, padding: "3px 8px" }} onClick={() => handleQuickCreate("track")}>
           + New Track
         </button>
-        <button className="vf-btn" style={{ fontSize: 10, padding: "3px 8px", marginLeft: "auto" }} onClick={refresh}>
+        <button className="vf-btn" style={{ fontSize: 10, padding: "3px 8px", marginLeft: "auto" }} onClick={() => refresh()}>
           ↻
         </button>
       </div>

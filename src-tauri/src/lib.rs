@@ -277,6 +277,16 @@ fn get_terminal_output(state: State<'_, Arc<PtyManager>>, id: String) -> Result<
     Ok(bufs.get(&id).cloned().unwrap_or_default())
 }
 
+/// Returns the current working directory so the frontend file tree
+/// can read from the project root instead of the app resource dir.
+/// Normalizes backslashes to forward slashes for consistent path building on the frontend.
+#[tauri::command]
+fn get_project_dir() -> String {
+    std::env::current_dir()
+        .map(|p| p.display().to_string().replace("\\", "/"))
+        .unwrap_or_else(|_| ".".to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -289,7 +299,8 @@ pub fn run() {
             resize_terminal,
             kill_terminal,
             strip_claude_stop_messages,
-            get_terminal_output
+            get_terminal_output,
+            get_project_dir
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

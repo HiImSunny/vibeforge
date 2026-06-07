@@ -156,6 +156,7 @@ export default function TerminalPane({ ptyId, title, accent = "general", onData,
           style={{ fontSize: 10, padding: "1px 6px", minHeight: 20, minWidth: 20, border: "none", background: "transparent", marginLeft: 4 }}
           onClick={handleClose}
           title="Close terminal (kills PTY)"
+          aria-label={`Close ${title || ptyId} terminal`}
         >
           ✕
         </button>
@@ -166,6 +167,8 @@ export default function TerminalPane({ ptyId, title, accent = "general", onData,
         className="vf-pane-body"
         style={{ padding: 0, background: "#0a0c10", overflow: "hidden" }}
         onClick={() => termRef.current?.focus()}
+        role="application"
+        aria-label={`${title || ptyId} terminal output`}
       />
     </div>
   );
