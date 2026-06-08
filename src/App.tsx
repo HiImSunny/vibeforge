@@ -10,6 +10,12 @@ const AGENTS = [
   { id: "codex", label: "Codex", accent: "codex" },
   { id: "gemini", label: "Gemini", accent: "gemini" },
   { id: "aider", label: "Aider", accent: "aider" },
+  { id: "opencode", label: "OpenCode", accent: "opencode" },
+];
+
+const EMPTY_LAUNCHERS = [
+  ...AGENTS,
+  { id: "shell", label: "New Shell", accent: "general" },
 ];
 
 type TerminalSession = {
@@ -145,7 +151,7 @@ export default function VibeforgeShell() {
 
         <div className="active-badge">
           <span className="dot" />
-          {launched.length || 0} active
+          {terminals.length} active
         </div>
 
         <button className="icon-btn" aria-label="Open settings" title="Open settings"><span className="material-symbols-outlined">settings</span></button>
@@ -298,20 +304,39 @@ export default function VibeforgeShell() {
                   />
                 </>
               ) : (
-                <div className="terminal-body">
-                  <div className="muted"># Initialization...</div>
-                  <div><span className="tertiary">agent</span> <span className="primary">--model</span> claude-3.5-sonnet <span className="primary">--context</span> AGENT.md</div>
-                  <div className="iblock">
-                    Loading structured context...<br />
-                    [OK] Read plan/current.md<br />
-                    [OK] Read spec/architecture.md<br />
-                    Ready.
+                <div className="empty-state-container">
+                  <div className="empty-state-forge">Forge a New Session</div>
+                  <div className="empty-state-sub">
+                    Launch an agent or open a shell<br />to begin crafting with AI.
                   </div>
-                  <div><span className="tertiary">➜</span> <span className="on-surface">Select or create a terminal above to begin.</span></div>
-                  <div className="muted" style={{ marginTop: 8 }}>Waiting for input...</div>
-                  <div style={{ marginTop: 4 }}><span className="cursor-pulse" /></div>
-                </div>
-              )}
+
+                  <div className="empty-state-arc">
+                    {EMPTY_LAUNCHERS.filter(l => l.id !== "shell").map((l) => (
+                      <button
+                        key={l.id}
+                        className={`empty-launcher ${l.accent}`}
+                        onClick={() => {
+                          if (l.id === "shell") spawnNewTerminal();
+                          else launchAgent(l as typeof AGENTS[number]);
+                        }}
+                        aria-label={`Launch ${l.label}`}
+                        title={`Launch ${l.label}`}
+                      >
+                        <span className="el-dot" />
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    className="empty-shell-btn"
+                    onClick={spawnNewTerminal}
+                    aria-label="Open new system shell"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>terminal</span>
+                    New Shell
+                  </button>
+                </div>              )}
             </div>
           </div>
         </section>
@@ -474,7 +499,7 @@ export default function VibeforgeShell() {
       </main>
 
       {/* Statusbar */}
-      <footer className="vf-statusbar">
+      <footer className={`vf-statusbar heat-${terminals.length >= 3 ? "3" : String(terminals.length)}`}>
         <div className="status-left">
           <span className="status-item">
             <span className="material-symbols-outlined">check_circle</span>
