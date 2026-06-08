@@ -3,6 +3,7 @@ import "./App.css";
 import FileTree from "./components/FileTree";
 import TerminalPane from "./components/TerminalPane";
 import GlassPanel from "./components/GlassPanel";
+import BrowserPanel from "./components/BrowserPanel";
 import { invoke } from "@tauri-apps/api/core";
 
 const AGENTS = [
@@ -42,6 +43,7 @@ export default function VibeforgeShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  const [rightPanelTab, setRightPanelTab] = useState("browser");
   const [status, setStatus] = useState("VIBEFORGE v2.4.1 • ready");
 
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
@@ -356,17 +358,55 @@ export default function VibeforgeShell() {
           </div>
         )}
 
-        {/* Right Panel */}
+                {/* Right Panel */}
         <aside className={`vf-right${rightEffectiveCollapsed ? " collapsed" : ""}`} aria-label="Agent context panel">
           <GlassPanel intensity="medium" amberGlow className="right-panel-glass" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <div
-            className="right-header"
-            style={{ cursor: "pointer" }}
-            onClick={() => setRightCollapsed(!rightCollapsed)}
-          >
-            <span className="label">CONTEXT • SEND TO AGENT</span>
-            <button className="icon-btn" style={{ width: 20, height: 20 }} aria-label={rightEffectiveCollapsed ? "Expand context panel" : "Collapse context panel"}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+
+          {/* Right Panel Tab Header */}
+          <div className="right-tab-header">
+            <button
+              className={"right-tab-btn" + (rightPanelTab === "context" ? " active" : "")}
+              onClick={() => setRightPanelTab("context")}
+              aria-label="Quick Delegate context panel"
+              aria-pressed={rightPanelTab === "context"}
+            >
+              <span className="material-symbols-outlined">send</span>
+              Context
+            </button>
+            <button
+              className={"right-tab-btn" + (rightPanelTab === "browser" ? " active" : "")}
+              onClick={() => setRightPanelTab("browser")}
+              aria-label="Embedded browser panel"
+              aria-pressed={rightPanelTab === "browser"}
+            >
+              <span className="material-symbols-outlined">language</span>
+              Browser
+            </button>
+            <button
+              className={"right-tab-btn" + (rightPanelTab === "http" ? " active" : "")}
+              onClick={() => setRightPanelTab("http")}
+              aria-label="HTTP client panel"
+              aria-pressed={rightPanelTab === "http"}
+            >
+              <span className="material-symbols-outlined">api</span>
+              HTTP
+            </button>
+            <button
+              className={"right-tab-btn" + (rightPanelTab === "diff" ? " active" : "")}
+              onClick={() => setRightPanelTab("diff")}
+              aria-label="AI diff review panel"
+              aria-pressed={rightPanelTab === "diff"}
+            >
+              <span className="material-symbols-outlined">difference</span>
+              Diff
+            </button>
+            <button
+              className="icon-btn"
+              style={{ width: 24, height: 28, flexShrink: 0 }}
+              onClick={() => setRightCollapsed(!rightCollapsed)}
+              aria-label={rightEffectiveCollapsed ? "Expand context panel" : "Collapse context panel"}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 {rightEffectiveCollapsed ? "expand_content" : "collapse_content"}
               </span>
             </button>
@@ -374,124 +414,134 @@ export default function VibeforgeShell() {
 
           {!rightEffectiveCollapsed && (
             <div className="right-content">
-              <button className="context-stub" aria-label="Open browser stub">
-                <span className="left"><span className="material-symbols-outlined">language</span> Browser Stub</span>
-                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
-              </button>
-              <button className="context-stub" aria-label="Open HTTP stub">
-                <span className="left"><span className="material-symbols-outlined">api</span> HTTP Stub</span>
-                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
-              </button>
-              <button className="context-stub" aria-label="Open AI diff review">
-                <span className="left"><span className="material-symbols-outlined">difference</span> AI Diff Review</span>
-                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--outline)" }}>chevron_right</span>
-              </button>
-
-              {/* Quick Delegate */}
-              <div className="quick-delegate">
-                <div className="qd-label">Quick Delegate</div>
-
-                {terminals.length > 0 && (
-                  <>
-                    <div className="qd-field-label">Target terminal</div>
-                    <select
-                      value={delegateTargetId || focusedPtyId || ""}
-                      onChange={(e) => setDelegateTargetId(e.target.value || null)}
-                      className="qd-select"
-                    >
-                      {terminals.map((t) => (
-                        <option key={t.ptyId} value={t.ptyId}>
-                          {t.title} {t.ptyId === focusedPtyId ? "(focused)" : ""}
-                        </option>
-                      ))}
-                    </select>
-                  </>
-                )}
-
-                <textarea
-                  value={delegatePrompt}
-                  onChange={(e) => setDelegatePrompt(e.target.value)}
-                  className="qd-textarea"
-                  placeholder="Describe the task"
-                  aria-label="Task prompt for selected terminal"
+              {rightPanelTab === "browser" && (
+                <BrowserPanel
+                  onSendToAI={sendToFocusedTerminal}
+                  focusedTerminalName={focusedSession?.title || null}
                 />
+              )}
 
-                {lastTreeContext && (
-                  <button
-                    className="qd-row-btn"
-                    style={{ marginBottom: 4, fontSize: 9, padding: "1px 4px" }}
-                    onClick={() => {
-                      const ctx = `\n\n[context from tree]\n${lastTreeContext}`;
-                      setDelegatePrompt((p) => (p.trim() ? p + ctx : ctx.trim()));
-                    }}
-                  >
-                    Insert tree context: {lastTreeContext.length > 28 ? "..." + lastTreeContext.slice(-25) : lastTreeContext}
-                  </button>
-                )}
-
-                <button
-                  className="qd-send-btn"
-                  disabled={!(delegateTargetId || focusedPtyId) || !delegatePrompt.trim()}
-                  onClick={async () => {
-                    const target = delegateTargetId || focusedPtyId;
-                    if (!target) return;
-                    const taskMsg = `Task:\n${delegatePrompt.trim()}\n\nPlease complete this task. Use any provided context.`;
-                    try {
-                      await invoke("write_to_terminal", { id: target, data: taskMsg + "\n" });
-                      setStatus(`Task sent to ${target}`);
-                      setDelegatePrompt("");
-                    } catch {
-                      setStatus("Delegate failed");
-                    }
-                  }}
-                >
-                  Send task to target
-                </button>
-
-                <div className="qd-row">
-                  <button className="qd-row-btn" onClick={async () => {
-                    const sample = `Đây là phân tích lỗi...\n   Tôi đã kiểm tra file A và B.\n   Kết luận: cần sửa logic X.\n\n   Claude Code has stopped\n   Một số dòng rác sau này không được xuất hiện`;
-                    try {
-                      const cleaned: string = await invoke("strip_claude_stop_messages", { output: sample });
-                      setStatus(`Strip demo: ${cleaned}`);
-                    } catch { setStatus("Strip failed"); }
-                  }}>
-                    Demo strip
-                  </button>
-                  <button className="qd-row-btn" disabled={!(delegateTargetId || focusedPtyId)} onClick={async () => {
-                    const target = delegateTargetId || focusedPtyId;
-                    if (!target) return;
-                    try {
-                      const raw: string = await invoke("get_terminal_output", { id: target });
-                      const cleaned: string = await invoke("strip_claude_stop_messages", { output: raw });
-                      setLastCaptured(cleaned);
-                      setStatus(`Captured ${raw.length} chars → stripped to ${cleaned.length}`);
-                    } catch { setStatus("Capture failed"); }
-                  }}>
-                    Capture + strip
-                  </button>
+              {rightPanelTab === "http" && (
+                <div style={{ padding: "12px", color: "var(--outline)", fontFamily: "JetBrains Mono, monospace", fontSize: 11, textAlign: "center", flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span>HTTP Client - coming in Milestone 2</span>
                 </div>
+              )}
 
-                {lastCaptured && (
-                  <div className="captured-area">
-                    <div className="captured-label">Last captured + stripped</div>
+              {rightPanelTab === "diff" && (
+                <div style={{ padding: "12px", color: "var(--outline)", fontFamily: "JetBrains Mono, monospace", fontSize: 11, textAlign: "center", flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span>AI Diff Review - coming in Milestone 3</span>
+                </div>
+              )}
+
+              {rightPanelTab === "context" && (
+                <>
+                  {/* Quick Delegate */}
+                  <div className="quick-delegate">
+                    <div className="qd-label">Quick Delegate</div>
+
+                    {terminals.length > 0 && (
+                      <>
+                        <div className="qd-field-label">Target terminal</div>
+                        <select
+                          value={delegateTargetId || focusedPtyId || ""}
+                          onChange={(e) => setDelegateTargetId(e.target.value || null)}
+                          className="qd-select"
+                        >
+                          {terminals.map((t) => (
+                            <option key={t.ptyId} value={t.ptyId}>
+                              {t.title} {t.ptyId === focusedPtyId ? "(focused)" : ""}
+                            </option>
+                          ))}
+                        </select>
+                      </>
+                    )}
+
                     <textarea
-                      readOnly
-                      value={lastCaptured}
-                      className="captured-textarea"
+                      value={delegatePrompt}
+                      onChange={(e) => setDelegatePrompt(e.target.value)}
+                      className="qd-textarea"
+                      placeholder="Describe the task"
+                      aria-label="Task prompt for selected terminal"
                     />
+
+                    {lastTreeContext && (
+                      <button
+                        className="qd-row-btn"
+                        style={{ marginBottom: 4, fontSize: 9, padding: "1px 4px" }}
+                        onClick={() => {
+                          const ctx = `\n\n[context from tree]\n${lastTreeContext}`;
+                          setDelegatePrompt((p) => (p.trim() ? p + ctx : ctx.trim()));
+                        }}
+                      >
+                        Insert tree context: {lastTreeContext.length > 28 ? "..." + lastTreeContext.slice(-25) : lastTreeContext}
+                      </button>
+                    )}
+
+                    <button
+                      className="qd-send-btn"
+                      disabled={!(delegateTargetId || focusedPtyId) || !delegatePrompt.trim()}
+                      onClick={async () => {
+                        const target = delegateTargetId || focusedPtyId;
+                        if (!target) return;
+                        const taskMsg = `Task:\n${delegatePrompt.trim()}\n\nPlease complete this task. Use any provided context.`;
+                        try {
+                          await invoke("write_to_terminal", { id: target, data: taskMsg + "\n" });
+                          setStatus(`Task sent to ${target}`);
+                          setDelegatePrompt("");
+                        } catch {
+                          setStatus("Delegate failed");
+                        }
+                      }}
+                    >
+                      Send task to target
+                    </button>
+
+                    <div className="qd-row">
+                      <button className="qd-row-btn" onClick={async () => {
+                        const sample = `Day la phan tich loi...\n   Toi da kiem tra file A va B.\n   Ket luan: can sua logic X.\n\n   Claude Code has stopped\n   Mot so dong rac sau nay khong duoc xuat hien`;
+                        try {
+                          const cleaned: string = await invoke("strip_claude_stop_messages", { output: sample });
+                          setStatus(`Strip demo: ${cleaned}`);
+                        } catch { setStatus("Strip failed"); }
+                      }}>
+                        Demo strip
+                      </button>
+                      <button className="qd-row-btn" disabled={!(delegateTargetId || focusedPtyId)} onClick={async () => {
+                        const target = delegateTargetId || focusedPtyId;
+                        if (!target) return;
+                        try {
+                          const raw: string = await invoke("get_terminal_output", { id: target });
+                          const cleaned: string = await invoke("strip_claude_stop_messages", { output: raw });
+                          setLastCaptured(cleaned);
+                          setStatus(`Captured ${raw.length} chars stripped to ${cleaned.length}`);
+                        } catch { setStatus("Capture failed"); }
+                      }}>
+                        Capture + strip
+                      </button>
+                    </div>
+
+                    {lastCaptured && (
+                      <div className="captured-area">
+                        <div className="captured-label">Last captured + stripped</div>
+                        <textarea
+                          readOnly
+                          value={lastCaptured}
+                          className="captured-textarea"
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div style={{ flex: 1 }} />
+                  <div style={{ flex: 1 }} />
 
-              <div className="drag-area">
-                <span className="drag-text">
-                  <span className="material-symbols-outlined">upload_file</span>
-                  Drag files / output here
-                </span>
-              </div>
+                  <div className="drag-area">
+                    <span className="drag-text">
+                      <span className="material-symbols-outlined">upload_file</span>
+                      Drag files / output here
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           )}
           </GlassPanel>
