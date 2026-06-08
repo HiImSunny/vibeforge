@@ -4,6 +4,7 @@ import FileTree from "./components/FileTree";
 import TerminalPane from "./components/TerminalPane";
 import GlassPanel from "./components/GlassPanel";
 import BrowserPanel from "./components/BrowserPanel";
+import HttpClientPanel from "./components/HttpClientPanel";
 import { invoke } from "@tauri-apps/api/core";
 
 const AGENTS = [
@@ -44,7 +45,7 @@ export default function VibeforgeShell() {
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [rightPanelTab, setRightPanelTab] = useState("browser");
-  const [status, setStatus] = useState("VIBEFORGE v2.4.1 • ready");
+  const [status, setStatus] = useState("VIBEFORGE v2.4.1 â€¢ ready");
 
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
     const ptyId = generatePtyId();
@@ -60,7 +61,7 @@ export default function VibeforgeShell() {
   }
 
   function launchAgent(agent: { id: string; label: string; accent: string }) {
-    createNewTerminal(agent.id, `${agent.label} • live`, agent.accent);
+    createNewTerminal(agent.id, `${agent.label} â€¢ live`, agent.accent);
     if (!launched.includes(agent.id)) setLaunched((p) => [...p, agent.id]);
   }
 
@@ -227,12 +228,12 @@ export default function VibeforgeShell() {
                 setLastTreeContext(p);
                 sendToFocusedTerminal(p);
               }}
-              onRefresh={() => setStatus("Tree refreshed • real disk")}
+              onRefresh={() => setStatus("Tree refreshed â€¢ real disk")}
             />
           </div>
 
           <div className="sidebar-note">
-            Real readDir + writeTextFile • structured folders prioritized
+            Real readDir + writeTextFile â€¢ structured folders prioritized
           </div>
             </>
           )}
@@ -243,7 +244,7 @@ export default function VibeforgeShell() {
           <div className="center-header">
             <div className="left">
               <span className="label">TERMINALS</span>
-              <span className="tl1" style={{ color: "var(--outline)" }}>• {terminals.length} open • focus one</span>
+              <span className="tl1" style={{ color: "var(--outline)" }}>â€¢ {terminals.length} open â€¢ focus one</span>
             </div>
             <button className="new-shell-btn" onClick={spawnNewTerminal} aria-label="Create new shell terminal">
               <span className="material-symbols-outlined">add</span> New Shell
@@ -261,7 +262,7 @@ export default function VibeforgeShell() {
               {terminals.map((t) => {
                 const isFocused = t.ptyId === focusedPtyId;
                 const hasActivity = !isFocused && t.hasRecentActivity;
-                const subStatus = isFocused ? "Active • focused" : (t.title.includes("live") ? "ready" : "shell");
+                const subStatus = isFocused ? "Active â€¢ focused" : (t.title.includes("live") ? "ready" : "shell");
                 const accentClass = t.accent || "general";
                 return (
                   <button
@@ -422,9 +423,10 @@ export default function VibeforgeShell() {
               )}
 
               {rightPanelTab === "http" && (
-                <div style={{ padding: "12px", color: "var(--outline)", fontFamily: "JetBrains Mono, monospace", fontSize: 11, textAlign: "center", flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span>HTTP Client - coming in Milestone 2</span>
-                </div>
+                <HttpClientPanel
+                  onSendToAI={sendToFocusedTerminal}
+                  focusedTerminalName={focusedSession?.title || null}
+                />
               )}
 
               {rightPanelTab === "diff" && (
