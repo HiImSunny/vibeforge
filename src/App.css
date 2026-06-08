@@ -286,10 +286,35 @@ body {
 
 .terminal-manager { flex: 1; display: flex; min-height: 0; }
 .terminal-list { width: 210px; flex-shrink: 0; border-right: 1px solid var(--border-grid); background: var(--mf-surface-1); overflow-y: auto; }
-.tli { width: 100%; padding: var(--sm) var(--md); border: 0; border-bottom: 1px solid var(--border-grid); border-radius: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; font: inherit; }
+.tli { width: 100%; padding: var(--sm) var(--md); border: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border); border-radius: 0; background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); color: inherit; cursor: pointer; text-align: left; font: inherit; position: relative; }
 .tli:hover { background: var(--surface-container); }
 .tli:focus-visible { outline: 1px solid var(--mf-amber); outline-offset: -2px; }
 .tli.focused { background: var(--surface-container-high); border-left: 2px solid var(--mf-amber); }
+/* Agent-specific focused accent borders */
+.tli.focused.claude { border-left-color: var(--mf-claude); }
+.tli.focused.claude .tname { color: var(--mf-claude); }
+.tli.focused.claude .tdot { background: var(--mf-claude); box-shadow: 0 0 4px rgba(0, 212, 170, 0.5); }
+.tli.focused.claude .mat-icon { color: var(--mf-claude); }
+.tli.focused.codex { border-left-color: var(--mf-codex); }
+.tli.focused.codex .tname { color: var(--mf-codex); }
+.tli.focused.codex .tdot { background: var(--mf-codex); box-shadow: 0 0 4px rgba(155, 89, 182, 0.5); }
+.tli.focused.codex .mat-icon { color: var(--mf-codex); }
+.tli.focused.gemini { border-left-color: var(--mf-gemini); }
+.tli.focused.gemini .tname { color: var(--mf-gemini); }
+.tli.focused.gemini .tdot { background: var(--mf-gemini); box-shadow: 0 0 4px rgba(16, 185, 129, 0.5); }
+.tli.focused.gemini .mat-icon { color: var(--mf-gemini); }
+.tli.focused.aider { border-left-color: var(--mf-aider); }
+.tli.focused.aider .tname { color: var(--mf-aider); }
+.tli.focused.aider .tdot { background: var(--mf-aider); box-shadow: 0 0 4px rgba(230, 126, 34, 0.5); }
+.tli.focused.aider .mat-icon { color: var(--mf-aider); }
+.tli.focused.opencode { border-left-color: var(--mf-opencode); }
+.tli.focused.opencode .tname { color: var(--mf-opencode); }
+.tli.focused.opencode .tdot { background: var(--mf-opencode); box-shadow: 0 0 4px rgba(52, 152, 219, 0.5); }
+.tli.focused.opencode .mat-icon { color: var(--mf-opencode); }
+.tli.focused.general { border-left-color: var(--mf-amber); }
+.tli.focused.general .tname { color: var(--mf-amber); }
+.tli.focused.general .tdot { background: var(--mf-amber); box-shadow: 0 0 4px var(--mf-amber-glow); }
+.tli.focused.general .mat-icon { color: var(--mf-amber); }
 .tli .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--xs); }
 .tli .left { display: flex; align-items: center; gap: var(--xs); }
 .tli .tname { font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 16px; font-weight: 500; }
@@ -303,6 +328,23 @@ body {
 .tli .mat-icon { font-size: 14px; }
 .tli.focused .mat-icon { color: var(--mf-amber); }
 .tli:not(.focused) .mat-icon { color: var(--on-surface); }
+
+/* Activity indicator — molten ember pulse on non-focused terminals with new output */
+.act-indicator {
+  position: absolute;
+  top: var(--sm);
+  right: var(--sm);
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mf-amber);
+  box-shadow: 0 0 6px var(--mf-amber-glow);
+  flex-shrink: 0;
+}
+.act-indicator.pulsing {
+  animation: ember-pulse 2s ease-in-out infinite;
+}
 
 .terminal-viewer { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--mf-bg); }
 
@@ -436,7 +478,8 @@ body {
 @supports not (backdrop-filter: blur(1px)) {
   .glass-panel,
   .vf-right,
-  .viewer-header {
+  .viewer-header,
+  .tli {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -456,6 +499,9 @@ body {
     background: rgba(13, 19, 33, 0.95);
   }
   .viewer-header {
+    background: rgba(13, 19, 33, 0.95);
+  }
+  .tli {
     background: rgba(13, 19, 33, 0.95);
   }
 }
