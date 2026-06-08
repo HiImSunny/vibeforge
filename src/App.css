@@ -2061,3 +2061,170 @@ body {
   color: var(--outline);
   line-height: 1.5;
 }
+
+/* ================================================================
+   Command Palette — Cmd+K Overlay (Midnight Forge)
+   ================================================================ */
+
+.cp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  background: rgba(8, 12, 20, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: cp-fade-in 150ms ease-out;
+}
+
+.cp-palette {
+  width: 480px;
+  max-width: calc(100vw - 48px);
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(240, 160, 80, 0.04);
+  overflow: hidden;
+  animation: cp-slide-in 200ms var(--transition-spring);
+}
+
+@keyframes cp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cp-slide-in {
+  from { opacity: 0; transform: translateY(-18px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cp-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+
+.cp-search-icon {
+  font-size: 18px;
+  color: var(--outline);
+  flex-shrink: 0;
+}
+
+.cp-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  color: var(--on-surface);
+  line-height: 20px;
+}
+
+.cp-input::placeholder {
+  color: var(--outline);
+}
+
+.cp-kbd-hint {
+  flex-shrink: 0;
+  padding: 0 6px;
+  background: var(--mf-surface-1);
+  border: 1px solid var(--border-grid);
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--outline);
+  line-height: 18px;
+}
+
+.cp-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.cp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--outline);
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+}
+
+.cp-empty .material-symbols-outlined {
+  font-size: 28px;
+  opacity: 0.5;
+}
+
+.cp-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--on-surface-variant);
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+
+.cp-item:hover {
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.cp-item.selected {
+  background: var(--primary-container);
+  color: var(--mf-amber);
+  box-shadow: inset 2px 0 0 var(--mf-amber);
+}
+
+.cp-item-icon {
+  font-size: 18px;
+  color: var(--outline);
+  flex-shrink: 0;
+}
+
+.cp-item.selected .cp-item-icon {
+  color: var(--mf-amber);
+}
+
+.cp-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* @supports fallback for backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .cp-overlay {
+    background: rgba(8, 12, 20, 0.85);
+  }
+  .cp-palette {
+    background: rgba(13, 19, 33, 0.95);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}

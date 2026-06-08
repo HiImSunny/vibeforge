@@ -1106,3 +1106,37 @@ All per AGENT.md + strict adherence to the UI design plan (the non-negotiable so
 
 **Artifacts:**
 - Git: commit on branch plan/vibeforge-phase2-terminals-pty-2025-06-09
+
+## 2025-06-09 — Command Palette (m3-cmd-palette)
+
+**Status:** DONE
+
+**Plan:** plan/m3-cmd-palette-2025-06-09.md
+
+**Actions:**
+- Created src/components/CommandPalette.tsx with search/filter, arrow-key navigation, Enter selection, Escape close
+- Added Cmd+K/Ctrl+K keyboard handler in App.tsx that opens/closes the palette
+- Defined 8 palette commands: New Terminal, Launch all 5 agents, Focus Mode toggle, Open Settings
+- Added glassmorphism CSS overlay (backdrop-filter blur, dark semi-transparent background, amber accent on selected item, spring-in animation)
+- Added @supports fallback for browsers without backdrop-filter support
+- Commands close palette after execution
+- Verified npm run build passes cleanly (tsc + vite build)
+
+**Verification:**
+- TypeScript compiles with zero errors
+- Vite build succeeds (44 modules, 1.75s)
+- All VAL-M3 assertions addressed (010-018):
+  - 010: Cmd+K opens palette (keyboard handler + state)
+  - 011: Glassmorphism with backdrop-filter blur
+  - 012: Search filters command list in real time
+  - 013: All 6+ expected commands present
+  - 014: Click executes command, palette closes
+  - 015: Arrow keys navigate, Enter selects
+  - 016: Escape closes palette
+  - 017: Palette closes after command execution
+  - 018: Midnight Forge design (dark theme, amber accent, glass overlay)
+
+**Next:** m3-persistence (pending)
+
+**Artifacts:**
+- Git: commit on branch plan/vibeforge-phase2-terminals-pty-2025-06-09

@@ -5,6 +5,7 @@ import TerminalPane from "./components/TerminalPane";
 import GlassPanel from "./components/GlassPanel";
 import BrowserPanel from "./components/BrowserPanel";
 import HttpClientPanel from "./components/HttpClientPanel";
+import CommandPalette, { Command } from "./components/CommandPalette";
 import { invoke } from "@tauri-apps/api/core";
 
 const AGENTS = [
@@ -46,6 +47,7 @@ export default function VibeforgeShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [rightPanelTab, setRightPanelTab] = useState("browser");
   const [status, setStatus] = useState("VIBEFORGE v2.4.1 Ã¢â‚¬Â¢ ready");
 
@@ -115,6 +117,19 @@ export default function VibeforgeShell() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // Cmd+K / Ctrl+K — toggle command palette
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        e.stopPropagation();
+        setPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (terminals.length === 0) return;
@@ -138,6 +153,19 @@ export default function VibeforgeShell() {
   const focusedSession = terminals.find((t) => t.ptyId === focusedPtyId) || null;
   const sidebarEffectiveCollapsed = sidebarCollapsed || focusMode;
   const rightEffectiveCollapsed = rightCollapsed || focusMode;
+
+
+  const paletteCommands: Command[] = [
+    { id: "new-terminal", label: "New Terminal", icon: "terminal", action: spawnNewTerminal },
+    { id: "launch-claude", label: "Launch Claude", icon: "smart_toy", action: () => launchAgent(AGENTS[0]) },
+    { id: "launch-codex", label: "Launch Codex", icon: "smart_toy", action: () => launchAgent(AGENTS[1]) },
+    { id: "launch-gemini", label: "Launch Gemini", icon: "smart_toy", action: () => launchAgent(AGENTS[2]) },
+    { id: "launch-aider", label: "Launch Aider", icon: "smart_toy", action: () => launchAgent(AGENTS[3]) },
+    { id: "launch-opencode", label: "Launch OpenCode", icon: "smart_toy", action: () => launchAgent(AGENTS[4]) },
+    { id: "focus-mode", label: "Focus Mode toggle", icon: "fullscreen", action: () => setFocusMode((prev) => !prev) },
+    { id: "open-settings", label: "Open Settings", icon: "settings", action: () => setStatus("Settings page") },
+  ];
+
 
   return (
     <div className="vf-root">
@@ -661,7 +689,12 @@ export default function VibeforgeShell() {
           <span>VIBEFORGE v2.4.1</span>
         </div>
       </footer>
-    </div>
+            <CommandPalette
+          isOpen={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          commands={paletteCommands}
+        />
+</div>
   );
 }
 
