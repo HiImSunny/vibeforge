@@ -183,9 +183,26 @@ body {
 .vf-main { flex: 1; display: flex; min-height: 0; }
 
 /* === Left Sidebar === */
-.vf-sidebar { width: 220px; flex-shrink: 0; background: var(--mf-surface-0); border-right: 1px solid var(--border-grid); display: flex; flex-direction: column; }
+.vf-sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--mf-surface-0);
+  border-right: 1px solid var(--border-grid);
+  display: flex; flex-direction: column;
+  transition: width var(--duration-normal) var(--transition-spring);
+  overflow: hidden;
+}
+.vf-sidebar.collapsed { width: 40px; }
 .sidebar-section { padding: var(--sm) var(--md); border-bottom: 1px solid var(--border-grid); flex-shrink: 0; }
 .sidebar-section.shrink-0 { flex-shrink: 0; }
+.sidebar-header-row { display: flex; align-items: center; justify-content: space-between; }
+.sidebar-collapse-btn {
+  background: none; border: 1px solid var(--border-grid);
+  border-radius: var(--radius); color: var(--outline);
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; width: 20px; height: 20px;
+  padding: 0;
+}
+.sidebar-collapse-btn:hover { color: var(--on-surface); background: var(--surface-container); }
 .sidebar-label { font-size: 10px; color: var(--outline); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600; margin-bottom: var(--xs); }
 .sidebar-project { display: flex; align-items: center; gap: var(--xs); font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--on-surface); }
 .sidebar-project .mat-icon { font-size: 14px; color: var(--mf-amber); }
@@ -212,6 +229,51 @@ body {
 .tree-badge { font-size: 9px; padding: 0 2px; background: var(--surface-bright); color: var(--outline); text-transform: uppercase; border: 1px solid var(--border-grid); margin-left: auto; flex-shrink: 0; }
 .tree-indent { padding-left: var(--md); }
 .sidebar-note { padding: var(--sm); border-top: 1px solid var(--border-grid); flex-shrink: 0; background: var(--mf-surface-1); color: var(--outline); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-style: italic; text-align: center; }
+
+/* === Icon Rail (collapsed sidebar) === */
+.icon-rail { display: flex; flex-direction: column; height: 100%; width: 40px; align-items: center; }
+.icon-rail-toggle {
+  width: 40px; height: 32px; background: none; border: none;
+  border-bottom: 1px solid var(--border-grid);
+  color: var(--outline); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.icon-rail-toggle:hover { color: var(--on-surface); background: var(--surface-container); }
+.icon-rail-toggle .material-symbols-outlined { font-size: 16px; }
+.icon-rail-items {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; padding: var(--sm) 0; gap: var(--sm);
+}
+.icon-rail-btn {
+  width: 32px; height: 32px; background: none; border: none;
+  border-radius: var(--radius); color: var(--outline);
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; position: relative;
+  transition: color var(--duration-fast), background var(--duration-fast);
+}
+.icon-rail-btn:hover { color: var(--mf-amber); background: var(--surface-container-high); }
+.icon-rail-btn .material-symbols-outlined { font-size: 18px; }
+.icon-rail-spacer { flex: 1; }
+
+/* === Right Panel Edge Toggle === */
+.right-edge-toggle {
+  width: 24px; flex-shrink: 0;
+  background: var(--mf-surface-1);
+  border-left: 1px solid var(--border-grid);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+.right-edge-toggle:hover { background: var(--surface-container); }
+.right-edge-toggle button {
+  background: none; border: none; color: var(--outline);
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; width: 24px; height: 100%;
+  padding: 0;
+}
+.right-edge-toggle button:hover { color: var(--mf-amber); }
+.right-edge-toggle .material-symbols-outlined { font-size: 14px; }
 
 /* === Center Terminal Area === */
 .vf-center { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--mf-bg); }
@@ -283,7 +345,7 @@ body {
   display: flex; flex-direction: column;
   transition: width var(--duration-normal) var(--transition-spring);
 }
-.vf-right.collapsed { width: 32px; overflow: hidden; }
+.vf-right.collapsed { width: 0px; overflow: hidden; padding: 0; border: none; }
 .right-header { height: 32px; flex-shrink: 0; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--md); background: transparent; }
 .right-header .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--outline); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
 

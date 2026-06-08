@@ -4,6 +4,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import "@xterm/xterm/css/xterm.css";
+import GlassPanel from "./GlassPanel";
 
 /**
  * TerminalPane â€” Phase 2 real PTY viewer (xterm + portable-pty)
@@ -142,25 +143,52 @@ export default function TerminalPane({ ptyId, title, accent = "general", onData,
     onClose?.();
   }
 
-  const accentClass = accent === "claude" ? "claude" : accent === "codex" ? "codex" : accent === "gemini" ? "gemini" : "";
+    const agentColorVar = accent ? `var(--mf-${accent})` : "var(--mf-amber)";
 
   return (
     <div className="vf-pane" data-pty-id={ptyId}>
-      {/* Viewer Header â€” closer to Stitch mock (Active badge + name) */}
-      <div className="viewer-header">
+      {/* Viewer Header — Midnight Forge glass chrome with agent accent */}
+      <GlassPanel
+        intensity="medium"
+        border={false}
+        amberGlow={accent === "general"}
+        style={{
+          height: 28,
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          padding: "0 var(--md)",
+          gap: "var(--sm)",
+          borderBottom: "1px solid var(--glass-border)",
+          borderLeft: `2px solid ${agentColorVar}`,
+        }}
+      >
         <span className="viewer-badge">Active</span>
-        <span className="viewer-name">{title || `${ptyId} â€¢ shell`}</span>
-        {accentClass && <span className={`vf-badge ${accentClass}`} style={{ fontSize: 9, marginLeft: 'auto' }}>{accent}</span>}
+        <span className="viewer-name">{title || `${ptyId} • shell`}</span>
+        <span
+          style={{
+            marginLeft: "auto",
+            width: 6, height: 6, borderRadius: "50%",
+            backgroundColor: agentColorVar,
+            boxShadow: `0 0 6px ${agentColorVar}`,
+            flexShrink: 0,
+          }}
+        />
         <button
           className="vf-btn"
-          style={{ fontSize: 10, padding: "1px 6px", minHeight: 20, minWidth: 20, border: "none", background: "transparent", marginLeft: 4 }}
+          style={{
+            fontSize: 10, padding: "1px 6px", minHeight: 20, minWidth: 20,
+            border: "1px solid var(--glass-border)", background: "transparent",
+            color: "var(--outline)", cursor: "pointer", borderRadius: "var(--radius)",
+          }}
           onClick={handleClose}
           title="Close terminal (kills PTY)"
           aria-label={`Close ${title || ptyId} terminal`}
         >
-          âœ•
+          ✕
         </button>
-      </div>
+      </GlassPanel>
+
 
       <div
         ref={containerRef}

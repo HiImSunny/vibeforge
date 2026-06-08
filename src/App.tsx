@@ -33,7 +33,9 @@ export default function VibeforgeShell() {
   const [lastTreeContext, setLastTreeContext] = useState<string | null>(null);
   const [delegateTargetId, setDelegateTargetId] = useState<string | null>(null);
   const [lastCaptured, setLastCaptured] = useState<string>("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const [status, setStatus] = useState("VIBEFORGE v2.4.1 • ready");
 
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
@@ -79,6 +81,18 @@ export default function VibeforgeShell() {
     setStatus(`Sent to ${focusedPtyId}`);
   }
 
+  // Focus Mode toggle (Ctrl+\)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
+        e.preventDefault();
+        setFocusMode((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (terminals.length === 0) return;
@@ -100,6 +114,8 @@ export default function VibeforgeShell() {
   }, [terminals, focusedPtyId]);
 
   const focusedSession = terminals.find((t) => t.ptyId === focusedPtyId) || null;
+  const sidebarEffectiveCollapsed = sidebarCollapsed || focusMode;
+  const rightEffectiveCollapsed = rightCollapsed || focusMode;
 
   return (
     <div className="vf-root">
@@ -139,14 +155,56 @@ export default function VibeforgeShell() {
       {/* Main */}
       <main className="vf-main">
         {/* Left Sidebar */}
-        <aside className="vf-sidebar" aria-label="Project files and structured workflow">
-          <div className="sidebar-section shrink-0">
-            <div className="sidebar-label">CURRENT PROJECT</div>
-            <div className="sidebar-project">
-              <span className="material-symbols-outlined">folder</span>
-              vibeforge <span className="badge">[main]</span>
+        <aside className={`vf-sidebar${sidebarEffectiveCollapsed ? " collapsed" : ""}`} aria-label="Project files and structured workflow">
+          {sidebarEffectiveCollapsed ? (
+            /* Icon Rail */
+            <div className="icon-rail">
+              <button
+                className="icon-rail-toggle"
+                onClick={() => {
+                  if (focusMode) setFocusMode(false);
+                  else setSidebarCollapsed(false);
+                }}
+                aria-label="Expand sidebar"
+                title="Expand sidebar"
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+              <div className="icon-rail-items">
+                <button className="icon-rail-btn" aria-label="Project files" title="Project files">
+                  <span className="material-symbols-outlined">folder</span>
+                </button>
+                <button className="icon-rail-btn" aria-label="Terminals" title="Terminals">
+                  <span className="material-symbols-outlined">terminal</span>
+                </button>
+                <button className="icon-rail-btn" aria-label="New shell" title="New shell" onClick={spawnNewTerminal}>
+                  <span className="material-symbols-outlined">add</span>
+                </button>
+                <div className="icon-rail-spacer" />
+                <button className="icon-rail-btn" aria-label="Open settings" title="Open settings">
+                  <span className="material-symbols-outlined">settings</span>
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="sidebar-section shrink-0">
+                <div className="sidebar-header-row">
+                  <div className="sidebar-label">CURRENT PROJECT</div>
+                  <button
+                    className="sidebar-collapse-btn"
+                    onClick={() => setSidebarCollapsed(true)}
+                    aria-label="Collapse sidebar to icon rail"
+                    title="Collapse sidebar (Ctrl+\)"
+                  >
+                    <span className="material-symbols-outlined">chevron_left</span>
+                  </button>
+                </div>
+                <div className="sidebar-project">
+                  <span className="material-symbols-outlined">folder</span>
+                  vibeforge <span className="badge">[main]</span>
+                </div>
+              </div>
 
           <div className="action-bar">
             <button className="action-btn" aria-label="Create plan"><span className="material-symbols-outlined">add</span> Plan</button>
@@ -168,6 +226,8 @@ export default function VibeforgeShell() {
           <div className="sidebar-note">
             Real readDir + writeTextFile • structured folders prioritized
           </div>
+            </>
+          )}
         </aside>
 
         {/* Center Terminal Area */}
@@ -192,12 +252,14 @@ export default function VibeforgeShell() {
               )}
               {terminals.map((t) => {
                 const isFocused = t.ptyId === focusedPtyId;
-                const subStatus = isFocused ? "Processing index.ts..." : (t.title.includes("live") ? "ready" : "shell");
+                const hasActivity = !isFocused && t.hasRecentActivity;
+                const subStatus = isFocused ? "Active • focused" : (t.title.includes("live") ? "ready" : "shell");
+                const accentClass = t.accent || "general";
                 return (
                   <button
                     key={t.ptyId}
                     type="button"
-                    className={`tli ${isFocused ? "focused" : ""}`}
+                    className={`tli ${isFocused ? `focused ${accentClass}` : ""}`}
                     onClick={() => focusTerminal(t.ptyId)}
                     aria-pressed={isFocused}
                     aria-label={`Focus ${t.title} terminal`}
@@ -210,6 +272,7 @@ export default function VibeforgeShell() {
                       <span className={`tdot ${isFocused ? "focused" : ""}`} />
                     </div>
                     <div className="tsub">{subStatus}</div>
+                    {hasActivity && <span className="act-indicator pulsing" title="New output" />}
                   </button>
                 );
               })}
@@ -219,10 +282,6 @@ export default function VibeforgeShell() {
             <div className="terminal-viewer">
               {focusedSession ? (
                 <>
-                  <div className="viewer-header">
-                    <span className="viewer-badge">Active</span>
-                    <span className="viewer-name">{focusedSession.title}</span>
-                  </div>
                   <TerminalPane
                     ptyId={focusedSession.ptyId}
                     title={focusedSession.title}
@@ -257,8 +316,23 @@ export default function VibeforgeShell() {
           </div>
         </section>
 
+        {/* Right Panel Edge Toggle (visible when right panel collapsed) */}
+        {rightEffectiveCollapsed && (
+          <div className="right-edge-toggle" title="Expand context panel (Ctrl+\)">
+            <button
+              onClick={() => {
+                if (focusMode) setFocusMode(false);
+                else setRightCollapsed(false);
+              }}
+              aria-label="Expand context panel"
+            >
+              <span className="material-symbols-outlined">chevron_left</span>
+            </button>
+          </div>
+        )}
+
         {/* Right Panel */}
-        <aside className={`vf-right ${rightCollapsed ? "collapsed" : ""}`} aria-label="Agent context panel">
+        <aside className={`vf-right${rightEffectiveCollapsed ? " collapsed" : ""}`} aria-label="Agent context panel">
           <GlassPanel intensity="medium" amberGlow className="right-panel-glass" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div
             className="right-header"
@@ -266,14 +340,14 @@ export default function VibeforgeShell() {
             onClick={() => setRightCollapsed(!rightCollapsed)}
           >
             <span className="label">CONTEXT • SEND TO AGENT</span>
-            <button className="icon-btn" style={{ width: 20, height: 20 }} aria-label={rightCollapsed ? "Expand context panel" : "Collapse context panel"}>
+            <button className="icon-btn" style={{ width: 20, height: 20 }} aria-label={rightEffectiveCollapsed ? "Expand context panel" : "Collapse context panel"}>
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
-                {rightCollapsed ? "expand_content" : "collapse_content"}
+                {rightEffectiveCollapsed ? "expand_content" : "collapse_content"}
               </span>
             </button>
           </div>
 
-          {!rightCollapsed && (
+          {!rightEffectiveCollapsed && (
             <div className="right-content">
               <button className="context-stub" aria-label="Open browser stub">
                 <span className="left"><span className="material-symbols-outlined">language</span> Browser Stub</span>
