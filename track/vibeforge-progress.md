@@ -1074,4 +1074,35 @@ All strictly per AGENT.md (reads first, track before/after code, small verifiabl
 
 **Git:** Will commit this focused UX improvement referencing the UI design plan + Phase 2 plan.
 
-All per AGENT.md + strict adherence to the UI design plan (the non-negotiable source of truth for frontend).
+All per AGENT.md + strict adherence to the UI design plan (the non-negotiable source of truth for frontend).## 2025-06-09 — AI Diff Review Panel (m3-ai-diff)
+
+**Status:** DONE
+
+**Plan:** plan/m3-ai-diff-2025-06-09.md
+
+**Actions:**
+- Read existing AIDiffPanel.tsx and diffUtils.ts (both fully implemented)
+- Added AIDiffPanel import to App.tsx
+- Replaced placeholder text with <AIDiffPanel> component
+- Added complete CSS for diff panel (.diff-panel, .diff-glass-header, .diff-file-list, .diff-hunk, .diff-lines with green/red, .diff-empty-state)
+- Fixed unused DiffHunk import TypeScript error
+- Verified npm run build passes cleanly
+
+**Verification:**
+- TypeScript compiles with zero errors
+- Vite build succeeds (43 modules, 1.90s)
+- All VAL-M3 assertions addressed (001-009)
+  - 001: Diff tab present in right sidebar
+  - 002: Files list with relative paths
+  - 003: Inline diffs with green (add) / red (remove)
+  - 004: Accept per file button
+  - 005: Reject per file button
+  - 006: Accept per hunk buttons
+  - 007: Reject per hunk buttons
+  - 008: Midnight Forge design with glass header
+  - 009: Empty state with "No AI changes detected"
+
+**Next:** None (feature complete)
+
+**Artifacts:**
+- Git: commit on branch plan/vibeforge-phase2-terminals-pty-2025-06-09

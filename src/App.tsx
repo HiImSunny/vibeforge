@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import "./App.css";
 import FileTree from "./components/FileTree";
 import TerminalPane from "./components/TerminalPane";
@@ -41,11 +41,13 @@ export default function VibeforgeShell() {
   const [lastTreeContext, setLastTreeContext] = useState<string | null>(null);
   const [delegateTargetId, setDelegateTargetId] = useState<string | null>(null);
   const [lastCaptured, setLastCaptured] = useState<string>("");
+  const [lastAiContext, setLastAiContext] = useState<string | null>(null);
+  const [sendToAiTargetId, setSendToAiTargetId] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [rightPanelTab, setRightPanelTab] = useState("browser");
-  const [status, setStatus] = useState("VIBEFORGE v2.4.1 â€¢ ready");
+  const [status, setStatus] = useState("VIBEFORGE v2.4.1 Ã¢â‚¬Â¢ ready");
 
   async function createNewTerminal(command: string | null, baseTitle: string, accent: string) {
     const ptyId = generatePtyId();
@@ -61,7 +63,7 @@ export default function VibeforgeShell() {
   }
 
   function launchAgent(agent: { id: string; label: string; accent: string }) {
-    createNewTerminal(agent.id, `${agent.label} â€¢ live`, agent.accent);
+    createNewTerminal(agent.id, `${agent.label} Ã¢â‚¬Â¢ live`, agent.accent);
     if (!launched.includes(agent.id)) setLaunched((p) => [...p, agent.id]);
   }
 
@@ -88,6 +90,17 @@ export default function VibeforgeShell() {
     if (!focusedPtyId) { setStatus("No focused terminal"); return; }
     invoke("write_to_terminal", { id: focusedPtyId, data: text + "\n" }).catch(() => {});
     setStatus(`Sent to ${focusedPtyId}`);
+  }
+
+  function handleSendToAI(context: string) {
+    setLastAiContext(context);
+    const targetId = sendToAiTargetId || focusedPtyId;
+    if (!targetId) {
+      setStatus("No terminals open. Create a terminal first.");
+      return;
+    }
+    invoke("write_to_terminal", { id: targetId, data: context + "\n" }).catch(() => {});
+    setStatus("Context sent to terminal");
   }
 
   // Focus Mode toggle (Ctrl+\)
@@ -226,14 +239,18 @@ export default function VibeforgeShell() {
             <FileTree
               onFileOpen={(p) => {
                 setLastTreeContext(p);
-                sendToFocusedTerminal(p);
+                if (focusedPtyId) {
+                  sendToFocusedTerminal(p);
+                } else {
+                  setStatus("No terminals open. Create a terminal first.");
+                }
               }}
-              onRefresh={() => setStatus("Tree refreshed â€¢ real disk")}
+              onRefresh={() => setStatus("Tree refreshed Ã¢â‚¬Â¢ real disk")}
             />
           </div>
 
           <div className="sidebar-note">
-            Real readDir + writeTextFile â€¢ structured folders prioritized
+            Real readDir + writeTextFile Ã¢â‚¬Â¢ structured folders prioritized
           </div>
             </>
           )}
@@ -244,7 +261,7 @@ export default function VibeforgeShell() {
           <div className="center-header">
             <div className="left">
               <span className="label">TERMINALS</span>
-              <span className="tl1" style={{ color: "var(--outline)" }}>â€¢ {terminals.length} open â€¢ focus one</span>
+              <span className="tl1" style={{ color: "var(--outline)" }}>Ã¢â‚¬Â¢ {terminals.length} open Ã¢â‚¬Â¢ focus one</span>
             </div>
             <button className="new-shell-btn" onClick={spawnNewTerminal} aria-label="Create new shell terminal">
               <span className="material-symbols-outlined">add</span> New Shell
@@ -262,7 +279,7 @@ export default function VibeforgeShell() {
               {terminals.map((t) => {
                 const isFocused = t.ptyId === focusedPtyId;
                 const hasActivity = !isFocused && t.hasRecentActivity;
-                const subStatus = isFocused ? "Active â€¢ focused" : (t.title.includes("live") ? "ready" : "shell");
+                const subStatus = isFocused ? "Active Ã¢â‚¬Â¢ focused" : (t.title.includes("live") ? "ready" : "shell");
                 const accentClass = t.accent || "general";
                 return (
                   <button
@@ -341,7 +358,38 @@ export default function VibeforgeShell() {
                   </button>
                 </div>              )}
             </div>
-          </div>
+                    </div>
+
+          {/* Floating Focus Mode context bar — visible when right panel collapsed and context available */}
+          {rightEffectiveCollapsed && lastAiContext && (
+            <div className="focus-context-bar">
+              <div className="focus-context-info">
+                <span className="material-symbols-outlined" style={{ fontSize: 12 }}>description</span>
+                Context captured ({lastAiContext.length}B)
+              </div>
+              <div className="focus-context-actions">
+                {terminals.length > 0 ? (
+                  <>
+                    {sendToAiTargetId && (
+                      <span className="focus-context-target">
+                        Target: {terminals.find(t => t.ptyId === sendToAiTargetId)?.title || "selected"}
+                      </span>
+                    )}
+                    <button
+                      className="focus-context-send-btn"
+                      onClick={() => handleSendToAI(lastAiContext)}
+                      title="Send captured context to target terminal"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 12 }}>send</span>
+                      Send
+                    </button>
+                  </>
+                ) : (
+                  <span className="focus-context-no-term">No terminals open</span>
+                )}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Right Panel Edge Toggle (visible when right panel collapsed) */}
@@ -417,14 +465,14 @@ export default function VibeforgeShell() {
             <div className="right-content">
               {rightPanelTab === "browser" && (
                 <BrowserPanel
-                  onSendToAI={sendToFocusedTerminal}
+                  onSendToAI={handleSendToAI}
                   focusedTerminalName={focusedSession?.title || null}
                 />
               )}
 
               {rightPanelTab === "http" && (
                 <HttpClientPanel
-                  onSendToAI={sendToFocusedTerminal}
+                  onSendToAI={handleSendToAI}
                   focusedTerminalName={focusedSession?.title || null}
                 />
               )}
@@ -437,6 +485,43 @@ export default function VibeforgeShell() {
 
               {rightPanelTab === "context" && (
                 <>
+                  {/* Send to AI Target Selector */}
+                  {terminals.length > 0 && (
+                    <div className="qd-selector-section">
+                      <div className="qd-label">Send to AI Target</div>
+                      <select
+                        value={sendToAiTargetId || focusedPtyId || ""}
+                        onChange={(e) => setSendToAiTargetId(e.target.value || null)}
+                        className="qd-select"
+                        aria-label="Select target terminal for Send to AI"
+                      >
+                        {terminals.map((t) => (
+                          <option key={t.ptyId} value={t.ptyId}>
+                            {t.title} {t.ptyId === focusedPtyId ? "(focused)" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Recent context indicator */}
+                  {lastAiContext && (
+                    <div className="recent-context-bar">
+                      <div className="recent-context-header">
+                        <span className="material-symbols-outlined" style={{ fontSize: 11 }}>description</span>
+                        Recent context captured
+                      </div>
+                      <button
+                        className="recent-context-resend"
+                        onClick={() => handleSendToAI(lastAiContext)}
+                        disabled={!focusedPtyId && !sendToAiTargetId}
+                        title="Resend captured context to terminal"
+                      >
+                        Resend context ({lastAiContext.length}B)
+                      </button>
+                    </div>
+                  )}
+
                   {/* Quick Delegate */}
                   <div className="quick-delegate">
                     <div className="qd-label">Quick Delegate</div>
@@ -579,3 +664,6 @@ export default function VibeforgeShell() {
     </div>
   );
 }
+
+
+

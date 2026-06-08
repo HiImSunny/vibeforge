@@ -1,4 +1,4 @@
-/* Vibeforge — Midnight Forge Design System */
+/* Vibeforge â€” Midnight Forge Design System */
 :root {
   /* === Midnight Forge Core Palette === */
   --mf-bg: #080c14;
@@ -333,7 +333,7 @@ body {
 .tli.focused .mat-icon { color: var(--mf-amber); }
 .tli:not(.focused) .mat-icon { color: var(--on-surface); }
 
-/* Activity indicator — molten ember pulse on non-focused terminals with new output */
+/* Activity indicator â€” molten ember pulse on non-focused terminals with new output */
 .act-indicator {
   position: absolute;
   top: var(--sm);
@@ -436,8 +436,8 @@ body {
 .status-divider { width: 1px; height: 12px; background: var(--outline-variant); }
 
 
-/* StatusBar Heat Map — color temperature shifts based on active terminal count */
-.vf-statusbar.heat-0 { /* cool — no amber */ }
+/* StatusBar Heat Map â€” color temperature shifts based on active terminal count */
+.vf-statusbar.heat-0 { /* cool â€” no amber */ }
 .vf-statusbar.heat-1 { box-shadow: inset 0 1px 0 rgba(240, 160, 80, 0.06); }
 .vf-statusbar.heat-2 { box-shadow: inset 0 1px 0 rgba(240, 160, 80, 0.12); background: rgba(240, 160, 80, 0.02); }
 .vf-statusbar.heat-3 { box-shadow: inset 0 2px 0 rgba(240, 160, 80, 0.18); background: rgba(240, 160, 80, 0.04); }
@@ -581,7 +581,7 @@ body {
 
 
 /* ================================================================
-   Empty State — Terminal Area
+   Empty State â€” Terminal Area
    ================================================================ */
 
 .empty-state-container {
@@ -735,7 +735,7 @@ body {
 }
 
 /* ================================================================
-   Browser Panel — Midnight Forge Embedded Browser
+   Browser Panel â€” Midnight Forge Embedded Browser
    ================================================================ */
 
 .browser-panel {
@@ -745,7 +745,7 @@ body {
   overflow: hidden;
 }
 
-/* ── Tab Bar ── */
+/* â”€â”€ Tab Bar â”€â”€ */
 
 .browser-tab-bar {
   display: flex;
@@ -836,7 +836,7 @@ body {
   background: var(--surface-container-high);
 }
 
-/* ── Toolbar (URL Bar + Nav + Send) — Glass Header ── */
+/* â”€â”€ Toolbar (URL Bar + Nav + Send) â€” Glass Header â”€â”€ */
 
 .browser-toolbar {
   display: flex;
@@ -916,6 +916,18 @@ body {
   box-shadow: 0 0 6px var(--mf-amber-glow);
 }
 
+.browser-target-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  font-size: 9px;
+  color: var(--outline);
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .browser-send-btn {
   flex-shrink: 0;
   padding: 2px 10px;
@@ -952,7 +964,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Webview / iframe ── */
+/* â”€â”€ Webview / iframe â”€â”€ */
 
 .browser-webview-wrap {
   flex: 1;
@@ -997,7 +1009,7 @@ body {
   100% { transform: translateX(100%); }
 }
 
-/* ── Console Area ── */
+/* â”€â”€ Console Area â”€â”€ */
 
 .browser-console {
   height: 140px;
@@ -1146,7 +1158,7 @@ body {
   white-space: nowrap;
 }
 
-/* ── Right Panel Tab Header ── */
+/* â”€â”€ Right Panel Tab Header â”€â”€ */
 
 .right-tab-header {
   display: flex;
@@ -1188,7 +1200,7 @@ body {
 }
 
 /* ================================================================
-   HTTP Client Panel — Midnight Forge HTTP Request Builder
+   HTTP Client Panel â€” Midnight Forge HTTP Request Builder
    ================================================================ */
 
 .http-panel {
@@ -1199,7 +1211,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Glass Header ── */
+/* â”€â”€ Glass Header â”€â”€ */
 
 .http-glass-header {
   display: flex;
@@ -1259,7 +1271,7 @@ body {
   border-color: rgba(240, 160, 80, 0.2);
 }
 
-/* ── Request Row (Method + URL + Send) ── */
+/* â”€â”€ Request Row (Method + URL + Send) â”€â”€ */
 
 .http-request-row {
   display: flex;
@@ -1348,7 +1360,7 @@ body {
   background: var(--surface-container-high);
 }
 
-/* ── Spinner ── */
+/* â”€â”€ Spinner â”€â”€ */
 
 .http-spinner {
   display: inline-block;
@@ -1364,7 +1376,7 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* ── Inline Error/Warning ── */
+/* â”€â”€ Inline Error/Warning â”€â”€ */
 
 .http-inline-error {
   padding: 2px 8px;
@@ -1386,7 +1398,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Collapsible Section ── */
+/* â”€â”€ Collapsible Section â”€â”€ */
 
 .http-section {
   border-bottom: 1px solid var(--border-grid);
@@ -1428,7 +1440,7 @@ body {
   font-size: 8px;
 }
 
-/* ── Headers Editor ── */
+/* â”€â”€ Headers Editor â”€â”€ */
 
 .http-headers-list {
   padding: 2px 4px 4px 4px;
@@ -1527,7 +1539,7 @@ body {
   background: var(--primary-container);
 }
 
-/* ── Body Editor ── */
+/* â”€â”€ Body Editor â”€â”€ */
 
 .http-body-editor-wrap {
   padding: 2px 4px 4px 4px;
@@ -1558,7 +1570,7 @@ body {
   color: var(--outline);
 }
 
-/* ── Response Area ── */
+/* â”€â”€ Response Area â”€â”€ */
 
 .http-response-area {
   flex-shrink: 0;
@@ -1603,7 +1615,7 @@ body {
   font-weight: 400;
 }
 
-/* ── Error Message ── */
+/* â”€â”€ Error Message â”€â”€ */
 
 .http-error-msg {
   padding: 6px 8px;
@@ -1618,7 +1630,7 @@ body {
   border-bottom: 1px solid rgba(255, 107, 107, 0.15);
 }
 
-/* ── Response Headers ── */
+/* â”€â”€ Response Headers â”€â”€ */
 
 .http-res-headers-list {
   padding: 2px 4px 4px 4px;
@@ -1658,7 +1670,7 @@ body {
   font-style: italic;
 }
 
-/* ── Response Body ── */
+/* â”€â”€ Response Body â”€â”€ */
 
 .http-res-body-wrap {
   padding: 2px 4px 4px 4px;
@@ -1688,8 +1700,27 @@ body {
   margin: 0;
 }
 
-/* ── Send to AI Button ── */
+/* â”€â”€ Send to AI Button â”€â”€ */
 
+.http-send-ai-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  margin: 4px 0;
+}
+.http-target-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  font-size: 9px;
+  color: var(--outline);
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .http-send-ai-btn {
   width: calc(100% - 8px);
   margin: 4px;
@@ -1714,7 +1745,7 @@ body {
   box-shadow: 0 0 8px var(--mf-amber-glow);
 }
 
-/* ── Collections ── */
+/* â”€â”€ Collections â”€â”€ */
 
 .http-collections {
   border-bottom: 1px solid var(--border-grid);
@@ -1828,7 +1859,7 @@ body {
   background: rgba(255, 107, 107, 0.1);
 }
 
-/* ── Save Dialog ── */
+/* â”€â”€ Save Dialog â”€â”€ */
 
 .http-save-dialog {
   padding: 4px 8px;
@@ -1887,7 +1918,7 @@ body {
   cursor: pointer;
 }
 
-/* ── Environment Variables ── */
+/* â”€â”€ Environment Variables â”€â”€ */
 
 .http-env {
   border-bottom: 1px solid var(--border-grid);
@@ -2011,7 +2042,7 @@ body {
   background: rgba(255, 107, 107, 0.1);
 }
 
-/* ── Empty State ── */
+/* â”€â”€ Empty State â”€â”€ */
 
 .http-empty-state {
   flex: 1;
