@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import FileTree from "./components/FileTree";
 import TerminalPane from "./components/TerminalPane";
+import GlassPanel from "./components/GlassPanel";
 import { invoke } from "@tauri-apps/api/core";
 
 const AGENTS = [
@@ -258,6 +259,7 @@ export default function VibeforgeShell() {
 
         {/* Right Panel */}
         <aside className={`vf-right ${rightCollapsed ? "collapsed" : ""}`} aria-label="Agent context panel">
+          <GlassPanel intensity="medium" amberGlow className="right-panel-glass" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div
             className="right-header"
             style={{ cursor: "pointer" }}
@@ -393,6 +395,7 @@ export default function VibeforgeShell() {
               </div>
             </div>
           )}
+          </GlassPanel>
         </aside>
       </main>
 

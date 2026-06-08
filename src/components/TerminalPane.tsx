@@ -6,12 +6,12 @@ import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import "@xterm/xterm/css/xterm.css";
 
 /**
- * TerminalPane — Phase 2 real PTY viewer (xterm + portable-pty)
+ * TerminalPane â€” Phase 2 real PTY viewer (xterm + portable-pty)
  *
  * - Pure viewer for an existing ptyId (PTY creation/kill is managed by parent list).
  * - Real xterm.js (v6) + FitAddon.
  * - Themed to Vibeforge calm technical palette.
- * - Bidirectional: onData → write_to_terminal; "terminal-output" events → term.write.
+ * - Bidirectional: onData â†’ write_to_terminal; "terminal-output" events â†’ term.write.
  * - Resize with fit + resize_terminal.
  * - Reports activity to parent via onActivity.
  * - Follows UI design + make-interfaces-feel-better.
@@ -40,11 +40,11 @@ export default function TerminalPane({ ptyId, title, accent = "general", onData,
 
     const term = new Terminal({
       cursorBlink: true,
-      fontFamily: "var(--vf-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace)",
+      fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
       fontSize: 12,
       lineHeight: 1.35,
       theme: {
-        background: "#0a0c10", // --vf-bg
+        background: "#080c14", // --vf-bg
         foreground: "#a3aab6", // matches .vf-pane-body
         cursor: "#c5c9d1",
         selectionBackground: "rgba(47, 58, 71, 0.6)",
@@ -146,10 +146,10 @@ export default function TerminalPane({ ptyId, title, accent = "general", onData,
 
   return (
     <div className="vf-pane" data-pty-id={ptyId}>
-      {/* Viewer Header — closer to Stitch mock (Active badge + name) */}
-      <div className="h-6 shrink-0 border-b-grid flex items-center px-md bg-surface-container gap-sm">
-        <span className="px-xs bg-primary-container text-on-primary-container text-[10px] rounded border-grid uppercase font-bold tracking-wider">Active</span>
-        <span className="font-label-md text-label-md text-on-surface">{title || `${ptyId} • shell`}</span>
+      {/* Viewer Header â€” closer to Stitch mock (Active badge + name) */}
+      <div className="viewer-header">
+        <span className="viewer-badge">Active</span>
+        <span className="viewer-name">{title || `${ptyId} â€¢ shell`}</span>
         {accentClass && <span className={`vf-badge ${accentClass}`} style={{ fontSize: 9, marginLeft: 'auto' }}>{accent}</span>}
         <button
           className="vf-btn"
@@ -158,14 +158,14 @@ export default function TerminalPane({ ptyId, title, accent = "general", onData,
           title="Close terminal (kills PTY)"
           aria-label={`Close ${title || ptyId} terminal`}
         >
-          ✕
+          âœ•
         </button>
       </div>
 
       <div
         ref={containerRef}
         className="vf-pane-body"
-        style={{ padding: 0, background: "#0a0c10", overflow: "hidden" }}
+        style={{ padding: 0, background: "#080c14", overflow: "hidden" }}
         onClick={() => termRef.current?.focus()}
         role="application"
         aria-label={`${title || ptyId} terminal output`}
